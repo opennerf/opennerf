@@ -1,6 +1,6 @@
 # OpenNeRF: OpenSet 3D Neural Scene Segmentation with Pixel-Wise Features and Rendered Novel Views
 
-![OpenNeRF Teaser](docs/static/images/teaser.png)
+![OpenNeRF Teaser](https://opennerf.github.io/static/images/teaser.png)
 
 ### Setup
 
@@ -66,7 +66,7 @@ See `.vscode/launch.json` for specific examples.
 @inproceedings{engelmann2024opennerf,
   title={{OpenNerf: Open Set 3D Neural Scene Segmentation with Pixel-Wise Features and Rendered Novel Views}},
   author={Engelmann, Francis and Manhardt, Fabian and Niemeyer, Michael and Tateno, Keisuke and Pollefeys, Marc and Tombari, Federico},
-  booktitle={The Twelfth International Conference on Learning Representations},
+  booktitle={International Conference on Learning Representations},
   year={2024}
 }
 ```
