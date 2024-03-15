@@ -1,0 +1,17 @@
+[project]
+name = "opennerf"
+description = "OpenNeRF embedding OpenSeg features into NeRF."
+version = "0.1.0"
+
+dependencies = [
+    "open_clip_torch",
+    "nerfstudio >= 0.3.0",
+    "clip @ git+https://github.com/openai/CLIP.git",
+    "tensorflow"] 
+
+[tool.setuptools.packages.find]
+include = ["opennerf*"]
+
+# register the entry point of your new method here:
+[project.entry-points.'nerfstudio.method_configs']
+opennerf = 'opennerf.opennerf_config:opennerf_method'
