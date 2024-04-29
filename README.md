@@ -13,7 +13,7 @@ ICLR 2024
 After installing conda (see [here](https://docs.anaconda.com/free/miniconda/#quick-command-line-install)), setup the conda environment:
 
 ```
-conda create --name opennerf -y python=3.8
+conda create --name opennerf -y python=3.10
 conda activate opennerf
 python -m pip install --upgrade pip
 ```
