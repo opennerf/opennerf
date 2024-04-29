@@ -30,7 +30,8 @@ from opennerf.opennerf_renderers import CLIPRenderer, MeanRenderer
 @dataclass
 class OpenNerfModelConfig(NerfactoModelConfig):
     _target: Type = field(default_factory=lambda: OpenNerfModel)
-    clip_loss_weight: float = 0.1
+    openseg_loss_weight: float = 0.0
+    dino_loss_weight: float = 0.0
     n_scales: int = 30
     max_scale: float = 1.5
     """maximum scale used to compute relevancy with"""
@@ -151,10 +152,10 @@ class OpenNerfModel(NerfactoModel):
             #     outputs["clip"], batch["clip"], delta=1.25, reduction="none"
             # )
             # loss_dict["clip_loss"] = unreduced_clip.sum(dim=-1).nanmean()
-            unreduced_dino = torch.nn.functional.mse_loss(outputs["dino"], batch["dino"], reduction="none")
+            unreduced_dino = self.config.dino_loss_weight * torch.nn.functional.mse_loss(outputs["dino"], batch["dino"], reduction="none")
             loss_dict["dino_loss"] = unreduced_dino.sum(dim=-1).nanmean()
             
-            unreduced_openseg = self.config.clip_loss_weight * torch.nn.functional.huber_loss(
+            unreduced_openseg = self.config.openseg_loss_weight * torch.nn.functional.huber_loss(
                 outputs["openseg"], batch["openseg"], delta=1.25, reduction="none"
             )
             loss_dict["openseg_loss"] = unreduced_openseg.sum(dim=-1).nanmean()

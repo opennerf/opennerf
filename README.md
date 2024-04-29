@@ -58,8 +58,12 @@ This repository creates a new Nerfstudio method named "opennerf". To train with 
 ```
 ns-train opennerf --data [PATH]
 ```
-See `.vscode/launch.json` for specific examples.
+See `.vscode/launch.json` for specific training examples.
 
+To view the optimized NeRF, you can launch the viewer separately:
+```
+ns-viewer --load-config outputs/path_to/config.yml
+```
 
 ## BibTeX
 ```

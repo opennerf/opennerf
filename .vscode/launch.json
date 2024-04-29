@@ -5,23 +5,43 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "train opennerf",
+            "name": "train opennerf lerf-ramen",
             "type": "debugpy",
             "request": "launch",
-            "program": "~/miniconda3/envs/nerfstudio/lib/python3.8/site-packages/nerfstudio/scripts/train.py",
+            "program": "~/miniconda3/envs/opennerf/lib/python3.8/site-packages/nerfstudio/scripts/train.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "args": [
             "opennerf",
-            "--vis=wandb",
+            "--vis=viewer+wandb",
             "--experiment-name=debug_ramen",
             "--viewer.num-rays-per-chunk=8192",
             "--steps-per-eval-batch=500000",
             "--steps-per-eval-image=500000",
             "--steps-per-eval-all-images=500000",
             // "--pipeline.datamanager.train-num-rays-per-batch=2048",
-            // "--data=/home/fengelmann/remote/cvg-scratch/scratch/03-PEOPLE/fengelmann/data/nerfstudio/ramen",],
-            "--data=/home/fengelmann/data/lerf/ramen",],
+            "--data=/home/fengelmann/remote/cvg-scratch/scratch/03-PEOPLE/fengelmann/data/nerfstudio/ramen",
+            // "--data=/home/fengelmann/data/lerf/ramen",
+            ],
         },
+        {
+            "name": "train opennerf replica-office0",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "~/miniconda3/envs/opennerf/lib/python3.8/site-packages/nerfstudio/scripts/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+            "opennerf",
+            "--vis=viewer",
+            "--experiment-name=replica-office0",
+            "--viewer.num-rays-per-chunk=8192",
+            "--steps-per-eval-batch=500000",
+            "--steps-per-eval-image=500000",
+            "--steps-per-eval-all-images=500000",
+            "--data=/home/fengelmann/remote/cvg-scratch/scratch/03-PEOPLE/fengelmann/data/Replica/office0",
+            ],
+        },
+
     ]
 }
