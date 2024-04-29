@@ -5,7 +5,7 @@ Currently this subclasses the Nerfacto model. Consider subclassing from the base
 """
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Type
+from typing import Dict, List, Tuple, Type, Literal
 
 import numpy as np
 import open_clip
@@ -24,41 +24,41 @@ from torch.nn import Parameter
 from opennerf.encoders.image_encoder import BaseImageEncoder
 from opennerf.opennerf_field import OpenNerfField
 from opennerf.opennerf_fieldheadnames import OpenNerfFieldHeadNames
-from opennerf.opennerf_renderers import CLIPRenderer, MeanRenderer
+from opennerf.opennerf_renderers import OpenSegRenderer, MeanRenderer
 
 
 @dataclass
 class OpenNerfModelConfig(NerfactoModelConfig):
     _target: Type = field(default_factory=lambda: OpenNerfModel)
-    openseg_loss_weight: float = 0.0
     dino_loss_weight: float = 0.0
+    openseg_loss_weight: float = 1.0
+    openseg_loss: Literal["Huber", "Cosine", "MSE"] = 'MSE'
     n_scales: int = 30
     max_scale: float = 1.5
     """maximum scale used to compute relevancy with"""
-    num_lerf_samples: int = 24
+    num_opennerf_samples: int = 24
     hashgrid_layers: Tuple[int] = (12, 12)
     hashgrid_resolutions: Tuple[Tuple[int]] = ((16, 128), (128, 512))
     hashgrid_sizes: Tuple[int] = (19, 19)
+    num_hidden_clip_layers: int = 1
 
 
 class OpenNerfModel(NerfactoModel):
-    """>>> OpenNerf Model."""
-
     config: OpenNerfModelConfig
 
     def populate_modules(self):
         super().populate_modules()
 
-        self.renderer_clip = CLIPRenderer()
+        self.renderer_openseg = OpenSegRenderer()
         self.renderer_mean = MeanRenderer()
 
-        # self.image_encoder: BaseImageEncoder = self.kwargs["image_encoder"]
         # self.image_encoder: BaseImageEncoder = self.kwargs["image_encoder"]
         self.opennerf_field = OpenNerfField(
             self.config.hashgrid_layers,
             self.config.hashgrid_sizes,
             self.config.hashgrid_resolutions,
-            clip_n_dims=512, #self.image_encoder.embedding_dim,
+            self.config.num_hidden_clip_layers,
+            # clip_n_dims=self.image_encoder.embedding_dim,
         )
         # self.opennerf_field = OpenNerfField(clip_n_dims=self.image_encoder.embedding_dim)
 
@@ -67,13 +67,13 @@ class OpenNerfModel(NerfactoModel):
         ray_samples_list.append(ray_samples)
 
         nerfacto_field_outputs, outputs, weights = self._get_outputs_nerfacto(ray_samples)
-        lerf_weights, best_ids = torch.topk(weights, self.config.num_lerf_samples, dim=-2, sorted=False)
+        opennerf_weights, best_ids = torch.topk(weights, self.config.num_opennerf_samples, dim=-2, sorted=False)
 
         def gather_fn(tens):
             return torch.gather(tens, -2, best_ids.expand(*best_ids.shape[:-1], tens.shape[-1]))
 
         dataclass_fn = lambda dc: dc._apply_fn_to_fields(gather_fn, dataclass_fn)
-        lerf_samples: RaySamples = ray_samples._apply_fn_to_fields(gather_fn, dataclass_fn)
+        opennerf_samples: RaySamples = ray_samples._apply_fn_to_fields(gather_fn, dataclass_fn)
 
         # if self.training:
         #     with torch.no_grad():
@@ -89,25 +89,26 @@ class OpenNerfModel(NerfactoModel):
         # override_scales = (
         #     None if "override_scales" not in ray_bundle.metadata else ray_bundle.metadata["override_scales"]
         # )
+
         weights_list.append(weights)
         if self.training:
             outputs["weights_list"] = weights_list
             outputs["ray_samples_list"] = ray_samples_list
-        for i in range(self.config.num_proposal_iterations):
-            outputs[f"prop_depth_{i}"] = self.renderer_depth(weights=weights_list[i], ray_samples=ray_samples_list[i])
+        # for i in range(self.config.num_proposal_iterations):
+        #    outputs[f"prop_depth_{i}"] = self.renderer_depth(weights=weights_list[i], ray_samples=ray_samples_list[i])
 
-        opennerf_field_outputs = self.opennerf_field.get_outputs(lerf_samples)
+        opennerf_field_outputs = self.opennerf_field.get_outputs(opennerf_samples)
         
         # if self.training:
             # outputs["clip"] = self.renderer_clip(
                 # embeds=opennerf_field_outputs[OpenNerfFieldHeadNames.CLIP], weights=lerf_weights.detach()
             # )
         outputs["dino"] = self.renderer_mean(
-            embeds=opennerf_field_outputs[OpenNerfFieldHeadNames.DINO], weights=lerf_weights.detach()
+            embeds=opennerf_field_outputs[OpenNerfFieldHeadNames.DINO], weights=opennerf_weights.detach()
         )
 
-        outputs["openseg"] = self.renderer_clip(
-            embeds=opennerf_field_outputs[OpenNerfFieldHeadNames.OPENSEG], weights=lerf_weights.detach()
+        outputs["openseg"] = self.renderer_openseg(
+            embeds=opennerf_field_outputs[OpenNerfFieldHeadNames.OPENSEG], weights=opennerf_weights.detach()
         )
 
         # if not self.training:

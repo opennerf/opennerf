@@ -10,17 +10,20 @@ import torch.distributed as dist
 from torch.cuda.amp.grad_scaler import GradScaler
 from torch.nn.parallel import DistributedDataParallel as DDP
 
-from opennerf.opennerf_datamanager import OpenNerfDataManager, OpenNerfDataManagerConfig
-from opennerf.opennerf_model import OpenNerfModel, OpenNerfModelConfig
-from nerfstudio.data.datamanagers.base_datamanager import (
-    DataManager,
-    DataManagerConfig,
-)
 from nerfstudio.models.base_model import ModelConfig
 from nerfstudio.pipelines.base_pipeline import (
     VanillaPipeline,
     VanillaPipelineConfig,
 )
+
+from opennerf.opennerf_datamanager import OpenNerfDataManager, OpenNerfDataManagerConfig
+from opennerf.opennerf_model import OpenNerfModel, OpenNerfModelConfig
+from opennerf.encoders.image_encoder import BaseImageEncoderConfig, BaseImageEncoder
+# from nerfstudio.data.datamanagers.base_datamanager import (
+#     DataManager,
+#     DataManagerConfig,
+# )
+
 
 
 @dataclass

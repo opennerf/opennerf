@@ -3,7 +3,7 @@ from jaxtyping import Float
 from torch import Tensor, nn
 
 
-class CLIPRenderer(nn.Module):
+class OpenSegRenderer(nn.Module):
     """Calculate CLIP embeddings along ray."""
 
     @classmethod

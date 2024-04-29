@@ -22,7 +22,7 @@ python -m pip install --upgrade pip
 ```
 conda install nvidia/label/cuda-12.1.1::cuda
 conda install pytorch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 pytorch-cuda=12.1 -c pytorch -c nvidia
-pip install ninja git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/torch
+python -m pip install ninja git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/torch
 ```
 ### Install OpenNeRF
 ```

@@ -5,6 +5,6 @@ from enum import Enum
 class OpenNerfFieldHeadNames(Enum):
     """Possible field outputs"""
     HASHGRID = "hashgrid"
-    CLIP = "clip"
+    # CLIP = "clip"
     DINO = "dino"
     OPENSEG = "openseg"

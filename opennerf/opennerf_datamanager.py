@@ -35,7 +35,7 @@ class OpenNerfDataManagerConfig(VanillaDataManagerConfig):
     """
 
     _target: Type = field(default_factory=lambda: OpenNerfDataManager)
-    clip_loss_weight: float = 0.1
+    # clip_loss_weight: float = 0.1
     n_scales: int = 30
     max_scale: float = 1.5
     """maximum scale used to compute relevancy with"""

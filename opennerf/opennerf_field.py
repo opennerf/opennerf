@@ -27,7 +27,8 @@ class OpenNerfField(Field):
         grid_layers,
         grid_sizes,
         grid_resolutions,
-        clip_n_dims: int,
+        num_hidden_clip_layers,
+        # clip_n_dims: int,
         spatial_distortion: SpatialDistortion = SceneContraction(),
     ) -> None:
 
@@ -117,6 +118,6 @@ class OpenNerfField(Field):
         outputs[OpenNerfFieldHeadNames.DINO] = dino_pass
 
         openseg_pass = self.openseg_net(x).view(*ray_samples.frustums.shape, -1)
-        outputs[OpenNerfFieldHeadNames.OPENSEG] = openseg_pass / openseg_pass.norm(dim=-1, keepdim=True)
+        outputs[OpenNerfFieldHeadNames.OPENSEG] = openseg_pass  #/ openseg_pass.norm(dim=-1, keepdim=True)
 
         return outputs
