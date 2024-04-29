@@ -19,17 +19,33 @@ python -m pip install --upgrade pip
 ```
 
 ### Install cuda, torch, etc.
+
 ```
 conda install nvidia/label/cuda-12.1.1::cuda
 conda install pytorch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 pytorch-cuda=12.1 -c pytorch -c nvidia
 python -m pip install ninja git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/torch
 ```
+
 ### Install OpenNeRF
+
 ```
 git clone https://github.com/opennerf/opennerf
 cd opennerf
 python -m pip install -e .
 ns-install-cli
+```
+
+## Running OpenNeRF
+
+This repository creates a new Nerfstudio method named "opennerf". To train with it, run the command:
+```
+ns-train opennerf --data [PATH]
+```
+See `.vscode/launch.json` for specific training examples.
+
+To view the optimized NeRF, you can launch the viewer separately:
+```
+ns-viewer --load-config outputs/path_to/config.yml
 ```
 
 ## File Structure
@@ -55,18 +71,6 @@ ns-install-cli
 │   ├── opennerf_pipeline.py
 │   ├── opennerf_renderers.py
 ├── pyproject.toml
-```
-
-## Running OpenNeRF
-This repository creates a new Nerfstudio method named "opennerf". To train with it, run the command:
-```
-ns-train opennerf --data [PATH]
-```
-See `.vscode/launch.json` for specific training examples.
-
-To view the optimized NeRF, you can launch the viewer separately:
-```
-ns-viewer --load-config outputs/path_to/config.yml
 ```
 
 ## BibTeX
