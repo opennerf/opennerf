@@ -1,9 +1,9 @@
 import torch
+from torch import nn, Tensor
 from jaxtyping import Float
-from torch import Tensor, nn
 
 
-class OpenSegRenderer(nn.Module):
+class CLIPRenderer(nn.Module):
     """Calculate CLIP embeddings along ray."""
 
     @classmethod

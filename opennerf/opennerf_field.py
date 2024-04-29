@@ -2,23 +2,25 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
-from jaxtyping import Float
-from nerfstudio.cameras.rays import RaySamples
-from nerfstudio.data.scene_box import SceneBox
-from nerfstudio.field_components.activations import trunc_exp
-from nerfstudio.field_components.field_heads import FieldHeadNames
-from nerfstudio.field_components.spatial_distortions import (SceneContraction,
-                                                             SpatialDistortion)
-from nerfstudio.fields.base_field import Field
-from torch import Tensor, nn
-from torch.nn.parameter import Parameter
-
 from opennerf.opennerf_fieldheadnames import OpenNerfFieldHeadNames
+from torch import Tensor
+from jaxtyping import Float
+
+from nerfstudio.cameras.rays import RaySamples
+from nerfstudio.field_components.spatial_distortions import (
+    SceneContraction,
+    SpatialDistortion,
+)
+from nerfstudio.fields.base_field import Field
 
 try:
     import tinycudann as tcnn
 except ImportError:
     pass
+except EnvironmentError as _exp:
+    if "Unknown compute capability" not in _exp.args[0]:
+        raise _exp
+    print("Could not load tinycudann: " + str(_exp), file=sys.stderr)
 
 
 class OpenNerfField(Field):
@@ -28,10 +30,8 @@ class OpenNerfField(Field):
         grid_sizes,
         grid_resolutions,
         num_hidden_clip_layers,
-        # clip_n_dims: int,
         spatial_distortion: SpatialDistortion = SceneContraction(),
-    ) -> None:
-
+    ):
         super().__init__()
         assert len(grid_layers) == len(grid_sizes) and len(grid_resolutions) == len(grid_layers)
         self.spatial_distortion = spatial_distortion
@@ -44,18 +44,6 @@ class OpenNerfField(Field):
             ]
         )
         tot_out_dims = sum([e.n_output_dims for e in self.clip_encs])
-
-        # self.clip_net = tcnn.Network(
-        #     n_input_dims=tot_out_dims + 1,
-        #     n_output_dims=clip_n_dims,
-        #     network_config={
-        #         "otype": "CutlassMLP",
-        #         "activation": "ReLU",
-        #         "output_activation": "None",
-        #         "n_neurons": 256,
-        #         "n_hidden_layers": 4,
-        #     },
-        # )
 
         self.dino_net = tcnn.Network(
             n_input_dims=tot_out_dims,
@@ -71,17 +59,15 @@ class OpenNerfField(Field):
 
         self.openseg_net = tcnn.Network(
             n_input_dims=tot_out_dims,
-            n_output_dims=768,  # this is the dimension of the openseg features
+            n_output_dims=768,
             network_config={
                 "otype": "CutlassMLP",
                 "activation": "ReLU",
                 "output_activation": "None",
                 "n_neurons": 256,
-                "n_hidden_layers": 1,
+                "n_hidden_layers": num_hidden_clip_layers,
             },
         )
-
-
     @staticmethod
     def _get_encoding(start_res, end_res, levels, indim=3, hash_size=19):
         growth = np.exp((np.log(end_res) - np.log(start_res)) / (levels - 1))
@@ -98,8 +84,7 @@ class OpenNerfField(Field):
         )
         return enc
 
-    def get_outputs(self, ray_samples: RaySamples) -> Dict[OpenNerfFieldHeadNames, Float[Tensor, "bs dim"]]:
-        # random scales, one scale
+    def get_outputs(self, ray_samples: RaySamples, clip_scales=None) -> Dict[OpenNerfFieldHeadNames, Float[Tensor, "bs dim"]]:
         outputs = {}
 
         positions = ray_samples.frustums.get_positions().detach()
@@ -109,15 +94,10 @@ class OpenNerfField(Field):
         xs = [e(positions.view(-1, 3)) for e in self.clip_encs]
         x = torch.concat(xs, dim=-1)
 
-        outputs[OpenNerfFieldHeadNames.HASHGRID] = x.view(*ray_samples.frustums.shape, -1)
-
-        # clip_pass = self.clip_net(torch.cat([x, clip_scales.view(-1, 1)], dim=-1)).view(*ray_samples.frustums.shape, -1)
-        # outputs[OpenNerfFieldHeadNames.CLIP] = clip_pass / clip_pass.norm(dim=-1, keepdim=True)
-
         dino_pass = self.dino_net(x).view(*ray_samples.frustums.shape, -1)
         outputs[OpenNerfFieldHeadNames.DINO] = dino_pass
 
         openseg_pass = self.openseg_net(x).view(*ray_samples.frustums.shape, -1)
-        outputs[OpenNerfFieldHeadNames.OPENSEG] = openseg_pass  #/ openseg_pass.norm(dim=-1, keepdim=True)
+        outputs[OpenNerfFieldHeadNames.OPENSEG] = openseg_pass
 
         return outputs
