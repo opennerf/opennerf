@@ -40,7 +40,6 @@ class FeatureDataloader(ABC):
         if cfg != self.cfg:
             raise ValueError("Config mismatch")
         self.data = torch.from_numpy(np.load(self.cache_path)).to(self.device)
-        print(self.data.shape)
 
     def save(self):
         os.makedirs(self.cache_path.parent, exist_ok=True)

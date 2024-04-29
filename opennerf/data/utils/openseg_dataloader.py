@@ -1,10 +1,10 @@
 import gc
+import os
 import typing
 
 import tensorflow as tf2
 import tensorflow.compat.v1 as tf
 import torch
-from opennerf.data.utils.dino_extractor import ViTExtractor
 from opennerf.data.utils.feature_dataloader import FeatureDataloader
 from opennerf.data.utils.openseg_extractor import extract_openseg_img_feature
 from tqdm import tqdm
@@ -26,7 +26,8 @@ class OpenSegDataloader(FeatureDataloader):
         # extractor = ViTExtractor(self.dino_model_type, self.dino_stride)
         # preproc_image_lst = extractor.preprocess(image_list, self.dino_load_size)[0].to(self.device)
 
-        saved_model_path = '/home/fengelmann/misc/openseg_exported_clip'
+        saved_model_path = '~/misc/openseg_exported_clip'
+        saved_model_path = os.path.realpath(os.path.expanduser(saved_model_path))
         openseg_model = tf2.saved_model.load(saved_model_path, tags=[tf.saved_model.tag_constants.SERVING],)
 
         openseg_embeds = []
@@ -36,12 +37,14 @@ class OpenSegDataloader(FeatureDataloader):
                 image_path = image_path_list[image_id]
                 h = self.cfg['image_shape'][0] // 4
                 w = self.cfg['image_shape'][1] // 4
-                descriptors = extract_openseg_img_feature(image_path, openseg_model, img_size=[h, w]) # img_size=[240, 320]
-            descriptors = descriptors.reshape(h, w, -1)
+                descriptors = extract_openseg_img_feature(image_path, openseg_model, img_size=[h, w])  # img_size=[240, 320]
+            # descriptors = descriptors.reshape(h, w, -1)
+            descriptors = descriptors.permute(1, 2, 0)
             openseg_embeds.append(descriptors.cpu().detach())
 
         del openseg_model
         gc.collect()
+        torch.cuda.empty_cache()
         self.data = torch.stack(openseg_embeds, dim=0)
 
     def __call__(self, img_points):

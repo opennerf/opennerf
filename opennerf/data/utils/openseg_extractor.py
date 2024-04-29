@@ -63,12 +63,16 @@ def extract_openseg_img_feature(img_dir, openseg_model, img_size=None, regional_
         image_embedding_feat = results['ppixel_ave_feat'][:, :crop_sz[0], :crop_sz[1]]
     else:
         image_embedding_feat = results['image_embedding_feat'][:, :crop_sz[0], :crop_sz[1]]
+    
     if img_size is not None:
         feat_2d = tf.cast(tf.image.resize_nearest_neighbor(
             image_embedding_feat, img_size, align_corners=True)[0], dtype=tf.float16).numpy()
     else:
         feat_2d = tf.cast(image_embedding_feat[[0]], dtype=tf.float16).numpy()
-    feat_2d = torch.from_numpy(feat_2d).permute(2, 0, 1)
+    
+    del results
+    del image_embedding_feat
+    feat_2d = torch.from_numpy(feat_2d).permute(2, 0, 1)  # dtype=torch.float16
     return feat_2d
 
 def save_fused_feature(feat_bank, point_ids, n_points, out_dir, scene_id, args):

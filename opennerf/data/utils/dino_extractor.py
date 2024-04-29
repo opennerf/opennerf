@@ -1,18 +1,17 @@
 # taken from https://github.com/ShirAmir/dino-vit-features
 
 import argparse
-import math
-import types
-from pathlib import Path
-from typing import List, Tuple, Union
-
-import timm
 import torch
-import torch.nn.modules.utils as nn_utils
 import torchvision.transforms
-from PIL import Image
 from torch import nn
 from torchvision import transforms
+import torch.nn.modules.utils as nn_utils
+import math
+import timm
+import types
+from pathlib import Path
+from typing import Union, List, Tuple
+from PIL import Image
 
 
 class ViTExtractor:
