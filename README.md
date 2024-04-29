@@ -2,7 +2,7 @@
 
 Francis Engelmann, Fabian Manhardt, Michael Niemeyer, Keisuke Tateno, Marc Pollefeys, Federico Tombari
 
---- ICLR 2024 ---
+ICLR 2024
 
 ![OpenNeRF Teaser](https://opennerf.github.io/static/images/teaser.png)
 
