@@ -7,7 +7,8 @@ dependencies = [
     "open_clip_torch",
     "clip @ git+https://github.com/openai/CLIP.git",
     "nerfstudio >= 0.3.1",
-    "tensorflow"] 
+    "tensorflow",
+    "pyviz3d"] 
 
 [tool.setuptools.packages.find]
 include = ["opennerf*"]

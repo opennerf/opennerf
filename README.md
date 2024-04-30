@@ -35,6 +35,28 @@ python -m pip install -e .
 ns-install-cli
 ```
 
+## Data preparation
+
+The datasets and saved NeRF models require significant disk space.
+Let's link them to some (remote) larger storage:
+```
+ln -s path/to/large_disk/data data
+ln -s path/to/large_disk/outputs outputs
+```
+
+### Replica Dataset
+Download the Replica dataset pre-processed by [NiceSlam](https://pengsongyou.github.io/nice-slam) and transform it into nerfstudio format using these steps:
+```
+cd data
+wget https://cvg-data.inf.ethz.ch/nice-slam/data/Replica.zip
+unzip Replica.zip
+cd ..
+python datasets/replica_preprocess.py
+```
+
+### LERF Dataset
+The preprocessed LERF dataset is available from the [official repository](https://drive.google.com/drive/folders/1vh0mSl7v29yaGsxleadcj-LCZOE_WEWB).
+
 ## Running OpenNeRF
 
 This repository creates a new Nerfstudio method named "opennerf". To train with it, run the command:

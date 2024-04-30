@@ -10,8 +10,6 @@ import open3d as o3d
 
 import replica
 
-# import openreno.utils as utils
-
 from nerfstudio.process_data import process_data_utils, record3d_utils
 from nerfstudio.process_data.process_data_utils import CAMERA_MODELS
 
@@ -88,7 +86,7 @@ def process_replica(data: Path, output_dir: Path):
     replica_to_json(copied_image_paths, traj_path, output_dir, indices=idx, scene_point_cloud=scene_point_cloud)
 
 
-def replica_to_json(images_paths: List[Path], trajectory_txt: Path, output_dir: Path, indices: np.ndarray, scene_point_cloud) -> int:
+def replica_to_json(images_paths: List[Path], trajectory_txt: Path, output_dir: Path, indices: np.ndarray) -> int:
     """Converts Replica's metadata and image paths to a JSON file.
 
     Args:
@@ -102,22 +100,13 @@ def replica_to_json(images_paths: List[Path], trajectory_txt: Path, output_dir: 
     """
 
     assert len(images_paths) == len(indices)
-
-    # metadata_dict = io.load_from_json(metadata_path)
-    # poses_data = np.array(metadata_dict["poses"])  # (N, 3, 4)
-
     poses_data = process_txt(trajectory_txt)
     poses_data = np.array(
             [np.array(
                 [float(v) for v in p.split()]).reshape((4, 4)) for p in poses_data]
         )
-    # NB: Record3D / scipy use "scalar-last" format quaternions (x y z w)
-    # https://fzheng.me/2017/11/12/quaternion_conventions_en/
-    # camera_to_worlds = np.concatenate(
-    #     [Rotation.from_quat(poses_data[:, :4]).as_matrix(), poses_data[:, 4:, None]],
-    #     axis=-1,
-    # ).astype(np.float32)
 
+    # Set up rotation matrix
     rot_x = np.eye(4)
     a = np.pi
     rot_x[1, 1] = np.cos(a)
@@ -126,17 +115,6 @@ def replica_to_json(images_paths: List[Path], trajectory_txt: Path, output_dir: 
     rot_x[2, 1] = np.sin(a)
 
     camera_to_worlds = poses_data[indices] @ rot_x
-
-    import pyviz3d.visualizer as viz
-    v = viz.Visualizer()
-    for i in range(camera_to_worlds.shape[0]):
-        c2w = camera_to_worlds[i, 0:3, :]
-        origin = c2w @ np.array([0, 0, 0, 1])
-        v.add_arrow(f'{i};Arrow_1', start=origin, end=c2w @ np.array([0.1, 0.0, 0.0, 1]), color=np.array([255, 0, 0]), stroke_width=0.005, head_width=0.01)
-        v.add_arrow(f'{i};Arrow_2', start=origin, end=c2w @ np.array([0.0, 0.1, 0.0, 1]), color=np.array([0, 255, 0]), stroke_width=0.005, head_width=0.01)
-        v.add_arrow(f'{i};Arrow_3', start=origin, end=c2w @ np.array([0.0, 0.0, 0.1, 1]), color=np.array([0, 0, 255]), stroke_width=0.005, head_width=0.01)
-    v.add_points('scene', np.array(scene_point_cloud.points), np.array(scene_point_cloud.colors) * 255, np.array(scene_point_cloud.normals))
-    v.save('example_arrows')
 
     frames = []
     for i, im_path in enumerate(images_paths):
@@ -151,57 +129,29 @@ def replica_to_json(images_paths: List[Path], trajectory_txt: Path, output_dir: 
         cam_params = json.load(file)
 
     # Camera intrinsics
-    # K = np.array(metadata_dict["K"]).reshape((3, 3)).T
-    focal_length = cam_params['camera']['fx']  # K[0, 0]
-
-    H = cam_params['camera']['h']
-    W = cam_params['camera']['w']
-
-    # TODO(akristoffersen): The metadata dict comes with principle points,
-    # but caused errors in image coord indexing. Should update once that is fixed.
-    cx, cy = W / 2.0, H / 2.0
+    focal_length = cam_params['camera']['fx']
+    h = cam_params['camera']['h']
+    w = cam_params['camera']['w']
+    cx, cy = w / 2.0, h / 2.0
 
     out = {
         "fl_x": focal_length,
         "fl_y": focal_length,
         "cx": cx,
         "cy": cy,
-        "w": W,
-        "h": H,
+        "w": w,
+        "h": h,
         "camera_model": CAMERA_MODELS["perspective"].name,
     }
 
     out["frames"] = frames
-
     with open(output_dir / "transforms.json", "w", encoding="utf-8") as f:
         json.dump(out, f, indent=4)
     return len(frames)
 
 
-def visualize_lerf_trajector(dir):
-
-    with open(dir / 'transforms.json') as f:
-        j = json.load(f)
-
-    import pyviz3d.visualizer as viz
-    v = viz.Visualizer()
-
-    for i, frame in enumerate(j['frames'][::1]):
-        c2w = np.array(frame['transform_matrix']).reshape(4,4)[0:3, :]
-        origin = c2w @ np.array([0, 0, 0, 1])
-        v.add_arrow(f'{i};Arrow_1', start=origin, end=c2w @ np.array([0.1, 0.0, 0.0, 1]), color=np.array([255, 0, 0]), stroke_width=0.005, head_width=0.01)
-        v.add_arrow(f'{i};Arrow_2', start=origin, end=c2w @ np.array([0.0, 0.1, 0.0, 1]), color=np.array([0, 255, 0]), stroke_width=0.005, head_width=0.01)
-        v.add_arrow(f'{i};Arrow_3', start=origin, end=c2w @ np.array([0.0, 0.0, 0.1, 1]), color=np.array([0, 0, 255]), stroke_width=0.005, head_width=0.01)
-    v.save(dir / 'visualization')
-
-
 if __name__ == "__main__":
-
     for scene in replica.scenes:
       data = f'data/Replica/{scene}'
-      output_dir = f'data/nerfstudio_/replica_{scene}'
+      output_dir = f'data/nerfstudio/replica_{scene}'
       process_replica(Path(data), Path(output_dir))
-      #visualize_lerf_trajector(Path(output_dir))
-
-    # lerf_dir = '/home/fengelmann/Programming/lerf/datasets/bouquet'
-    # visualize_lerf_trajector(Path(lerf_dir))

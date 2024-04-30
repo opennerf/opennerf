@@ -19,12 +19,12 @@
             "--steps-per-eval-batch=500000",
             "--steps-per-eval-image=500000",
             "--steps-per-eval-all-images=500000",
-            "--data=/home/fengelmann/remote/cvg-scratch/scratch/03-PEOPLE/fengelmann/data/nerfstudio/ramen",
-            "--output-dir=/home/fengelmann/remote/cvg-scratch/scratch/03-PEOPLE/fengelmann/data/outputs/opennerf/"
+            "--data=/home/fengelmann/Programming/opennerf/data/nerfstudio/ramen",
+            "--output-dir=/home/fengelmann/Programming/opennerf/outputs"
             ],
         },
         {
-            "name": "train opennerf replica-office0",
+            "name": "train opennerf replica_office0",
             "type": "debugpy",
             "request": "launch",
             "program": "~/miniconda3/envs/opennerf/lib/python3.10/site-packages/nerfstudio/scripts/train.py",
@@ -34,13 +34,33 @@
             "opennerf",
             "--vis=viewer+wandb",
             "--experiment-name=replica_office0",
-            "--viewer.num-rays-per-chunk=8192",
+            "--viewer.num-rays-per-chunk=2048",
             "--steps-per-eval-batch=500000",
             "--steps-per-eval-image=500000",
             "--steps-per-eval-all-images=500000",
             "--pipeline.datamanager.train-num-rays-per-batch=2048",
-            "--data=/home/fengelmann/remote/cvg-scratch/scratch/03-PEOPLE/fengelmann/data/nerfstudio/replica_office0",
-            "--output-dir=/home/fengelmann/remote/cvg-scratch/scratch/03-PEOPLE/fengelmann/data/outputs/opennerf/"
+            "--data=/home/fengelmann/Programming/opennerf/data/nerfstudio/replica_office0",
+            "--output-dir=/home/fengelmann/Programming/opennerf/outputs"
+            ],
+        },
+        {
+            "name": "train opennerf replica_office1",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "~/miniconda3/envs/opennerf/lib/python3.10/site-packages/nerfstudio/scripts/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+            "opennerf",
+            "--vis=viewer+wandb",
+            "--experiment-name=replica_office1",
+            "--viewer.num-rays-per-chunk=2048",
+            "--steps-per-eval-batch=500000",
+            "--steps-per-eval-image=500000",
+            "--steps-per-eval-all-images=500000",
+            "--pipeline.datamanager.train-num-rays-per-batch=2048",
+            "--data=/home/fengelmann/Programming/opennerf/data/nerfstudio/replica_office1",
+            "--output-dir=/home/fengelmann/Programming/opennerf/outputs"
             ],
         },
         {
@@ -62,6 +82,15 @@
             "--downscale-factor=2",
             ],
         },
-
+        {
+            "name": "preprocess replica",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "/home/fengelmann/Programming/opennerf/",
+            "program": "datasets/replica_preprocess.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [],
+        },
     ]
 }
