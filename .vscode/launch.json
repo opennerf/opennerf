@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "train opennerf lerf-ramen",
+            "name": "train opennerf lerf_ramen",
             "type": "debugpy",
             "request": "launch",
             "program": "~/miniconda3/envs/opennerf/lib/python3.10/site-packages/nerfstudio/scripts/train.py",
@@ -14,13 +14,13 @@
             "args": [
             "opennerf",
             "--vis=viewer+wandb",
-            "--experiment-name=debug_ramen",
+            "--experiment-name=lerf_ramen",
             "--viewer.num-rays-per-chunk=8192",
             "--steps-per-eval-batch=500000",
             "--steps-per-eval-image=500000",
             "--steps-per-eval-all-images=500000",
-            // "--pipeline.datamanager.train-num-rays-per-batch=2048",
             "--data=/home/fengelmann/remote/cvg-scratch/scratch/03-PEOPLE/fengelmann/data/nerfstudio/ramen",
+            "--output-dir=/home/fengelmann/remote/cvg-scratch/scratch/03-PEOPLE/fengelmann/data/outputs/opennerf/"
             ],
         },
         {
@@ -32,13 +32,34 @@
             "justMyCode": false,
             "args": [
             "opennerf",
-            "--vis=viewer",
-            "--experiment-name=replica-office0",
+            "--vis=viewer+wandb",
+            "--experiment-name=replica_office0",
             "--viewer.num-rays-per-chunk=8192",
             "--steps-per-eval-batch=500000",
             "--steps-per-eval-image=500000",
             "--steps-per-eval-all-images=500000",
-            "--data=/home/fengelmann/remote/cvg-scratch/scratch/03-PEOPLE/fengelmann/data/Replica/office0",
+            "--pipeline.datamanager.train-num-rays-per-batch=2048",
+            "--data=/home/fengelmann/remote/cvg-scratch/scratch/03-PEOPLE/fengelmann/data/nerfstudio/replica_office0",
+            "--output-dir=/home/fengelmann/remote/cvg-scratch/scratch/03-PEOPLE/fengelmann/data/outputs/opennerf/"
+            ],
+        },
+        {
+            "name": "render lerf-ramen",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "~/Programming/opennerf/opennerf/scripts/render.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+            "camera-path",
+            "--load-config=/home/fengelmann/Programming/opennerf/outputs/debug_ramen/opennerf/2024-04-29_201605/config.yml",
+            "--camera-path-filename=/home/fengelmann/remote/cvg-scratch/scratch/03-PEOPLE/fengelmann/data/nerfstudio/ramen/transforms.json",
+            "--colormap-options.colormap=pca",
+            "--output-format=npy",
+            "--output_path=renders/debug_ramen",
+            "--rendered-output-names=openseg",
+            "--eval-num-rays-per-chunk=500",
+            "--downscale-factor=2",
             ],
         },
 
