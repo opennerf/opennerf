@@ -76,6 +76,7 @@ class OpenNerfDataManager(VanillaDataManager):  # pylint: disable=abstract-metho
         dino_cache_path = Path(osp.join(cache_dir, "dino.npy"))
         openseg_cache_path = Path(osp.join(cache_dir, "openseg.npy"))
         # NOTE: cache config is sensitive to list vs. tuple, because it checks for dict equality
+        image_pathes = self.train_dataset._dataparser_outputs.image_filenames
 
         if test_mode == 'inference':
             return
@@ -86,7 +87,6 @@ class OpenNerfDataManager(VanillaDataManager):  # pylint: disable=abstract-metho
             cfg={"image_shape": list(images.shape[2:4])},
             cache_path=dino_cache_path,
         )
-        image_pathes = self.train_dataset._dataparser_outputs.image_filenames
         self.openseg_dataloader = OpenSegDataloader(
             image_list=image_pathes,
             device=self.device,

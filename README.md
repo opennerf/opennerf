@@ -70,6 +70,9 @@ To view the optimized NeRF, you can launch the viewer separately:
 ns-viewer --load-config outputs/path_to/config.yml
 ```
 
+## Semantic Predictions
+
+
 ## File Structure
 
 ```

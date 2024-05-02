@@ -6,11 +6,11 @@ from pathlib import Path
 from typing import Optional, List
 import numpy as np
 import json
-import open3d as o3d
+import shutil
 
 import replica
 
-from nerfstudio.process_data import process_data_utils, record3d_utils
+from nerfstudio.process_data import process_data_utils
 from nerfstudio.process_data.process_data_utils import CAMERA_MODELS
 
 
@@ -30,8 +30,10 @@ def process_replica(data: Path, output_dir: Path):
     2. Converts Record3D poses into the nerfstudio format.
     """
 
-    mesh_path = data / '..' / 'office0_mesh.ply'  # why do we need this?
-    scene_point_cloud = o3d.io.read_point_cloud(str(mesh_path))
+    # copy mesh data
+    mesh_path = data / '..' / f'{data.name}_mesh.ply'
+    shutil.copy2(mesh_path, output_dir)
+
     verbose = True
     num_downscales = 3
     """Number of times to downscale the images. Downscales by 2 each time. For example a value of 3
@@ -43,6 +45,8 @@ def process_replica(data: Path, output_dir: Path):
     output_dir.mkdir(parents=True, exist_ok=True)
     image_dir = output_dir / "images"
     image_dir.mkdir(parents=True, exist_ok=True)
+    depth_dir = output_dir / "depths"
+    depth_dir.mkdir(parents=True, exist_ok=True)
 
     summary_log = []
 
@@ -52,18 +56,26 @@ def process_replica(data: Path, output_dir: Path):
         raise ValueError(f"Image directory {replica_image_dir} doesn't exist")
 
     replica_image_filenames = []
+    replica_depth_filenames = []
     for f in replica_image_dir.iterdir():
         if f.stem.startswith('frame'):  # removes possible duplicate images (for example, 123(3).jpg)
             if f.suffix.lower() in [".jpg"]:
                 replica_image_filenames.append(f)
+        if f.stem.startswith('depth'):  # removes possible duplicate images (for example, 123(3).jpg)
+            if f.suffix.lower() in [".png"]:
+                replica_depth_filenames.append(f)
 
     replica_image_filenames = sorted(replica_image_filenames)
+    replica_depth_filenames = sorted(replica_depth_filenames)
+    assert(len(replica_image_filenames) == len(replica_depth_filenames))
     num_images = len(replica_image_filenames)
+
     idx = np.arange(num_images)
     if max_dataset_size != -1 and num_images > max_dataset_size:
         idx = np.round(np.linspace(0, num_images - 1, max_dataset_size)).astype(int)
 
     replica_image_filenames = list(np.array(replica_image_filenames)[idx])
+    replica_depth_filenames = list(np.array(replica_depth_filenames)[idx])
 
     # Copy images to output directory
     copied_image_paths = process_data_utils.copy_images_list(
@@ -72,6 +84,13 @@ def process_replica(data: Path, output_dir: Path):
         verbose=verbose,
         num_downscales=num_downscales,
     )
+    copied_depth_paths = process_data_utils.copy_images_list(
+        replica_depth_filenames,
+        image_dir=depth_dir,
+        verbose=verbose,
+        num_downscales=num_downscales,
+    )
+    assert(len(copied_image_paths) == len(copied_depth_paths))
     num_frames = len(copied_image_paths)
 
     copied_image_paths = [Path("images/" + copied_image_path.name) for copied_image_path in copied_image_paths]
@@ -83,7 +102,7 @@ def process_replica(data: Path, output_dir: Path):
         )
 
     traj_path = data / "traj.txt"
-    replica_to_json(copied_image_paths, traj_path, output_dir, indices=idx, scene_point_cloud=scene_point_cloud)
+    replica_to_json(copied_image_paths, traj_path, output_dir, indices=idx)
 
 
 def replica_to_json(images_paths: List[Path], trajectory_txt: Path, output_dir: Path, indices: np.ndarray) -> int:
