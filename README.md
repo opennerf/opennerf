@@ -1,4 +1,4 @@
-<p align="center">
+<span align="center">
 <h1> OpenNeRF: OpenSet 3D Neural Scene Segmentation with Pixel-Wise Features and Rendered Novel Views</h1>
 
 <a href="https://francisengelmann.github.io">Francis Engelmann</a>,
@@ -9,11 +9,14 @@
 <a href="https://federicotombari.github.io">Federico Tombari</a>
 
 <h3>ICLR 2024</h3>
-</p>
+
+<a href="https://arxiv.org/abs/2404.03650">Paper</a> | <a href="http://opennerf.github.io">Project Page</a>
+
+</span>
 
 ![OpenNeRF Teaser](https://opennerf.github.io/static/images/teaser.png)
 
-### Setup
+## Installation
 
 #### Install NerfStudio
 
