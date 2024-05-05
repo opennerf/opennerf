@@ -1,6 +1,7 @@
 # OpenNeRF: OpenSet 3D Neural Scene Segmentation with Pixel-Wise Features and Rendered Novel Views
 
-Francis Engelmann, Fabian Manhardt, Michael Niemeyer, Keisuke Tateno, Marc Pollefeys, Federico Tombari
+<a href="https://francisengelmann.github.io">Francis Engelmann</a>,
+Fabian Manhardt, Michael Niemeyer, Keisuke Tateno, Marc Pollefeys, Federico Tombari
 
 ICLR 2024
 
