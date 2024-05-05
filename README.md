@@ -7,7 +7,7 @@
 <a href="https://inf.ethz.ch/people/person-detail.pollefeys.html">Marc Pollefeys</a>,
 <a href="https://federicotombari.github.io">Federico Tombari</a>
 
-##ICLR 2024
+<h3>ICLR 2024</h3>
 
 ![OpenNeRF Teaser](https://opennerf.github.io/static/images/teaser.png)
 
