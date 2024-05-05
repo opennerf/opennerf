@@ -1,5 +1,5 @@
 <span align="center">
-<h1> OpenNeRF: OpenSet 3D Neural Scene Segmentation with Pixel-Wise Features and Rendered Novel Views</h1>
+<h1> OpenNeRF: OpenSet 3D Neural Scene Segmentation<br>with Pixel-Wise Features and Rendered Novel Views</h1>
 
 <a href="https://francisengelmann.github.io">Francis Engelmann</a>,
 <a href="https://scholar.google.de/citations?user=bERItx8AAAAJ">Fabian Manhardt</a>,
