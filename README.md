@@ -1,4 +1,3 @@
-<center>
 # OpenNeRF: OpenSet 3D Neural Scene Segmentation with Pixel-Wise Features and Rendered Novel Views
 
 <a href="https://francisengelmann.github.io">Francis Engelmann</a>,
@@ -9,7 +8,7 @@
 <a href="https://federicotombari.github.io">Federico Tombari</a>
 
 ##ICLR 2024
-</center>
+
 ![OpenNeRF Teaser](https://opennerf.github.io/static/images/teaser.png)
 
 ### Setup
