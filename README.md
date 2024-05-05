@@ -108,7 +108,7 @@ ns-viewer --load-config outputs/path_to/config.yml
 ## BibTeX
 ```
 @inproceedings{engelmann2024opennerf,
-  title={{OpenNerf: Open Set 3D Neural Scene Segmentation with Pixel-Wise Features and Rendered Novel Views}},
+  title={{OpenNeRF: Open Set 3D Neural Scene Segmentation with Pixel-Wise Features and Rendered Novel Views}},
   author={Engelmann, Francis and Manhardt, Fabian and Niemeyer, Michael and Tateno, Keisuke and Pollefeys, Marc and Tombari, Federico},
   booktitle={International Conference on Learning Representations},
   year={2024}
