@@ -63,7 +63,7 @@
             ],
         },
         {
-            "name": "preprocess replica",
+            "name": "replica preprocess",
             "type": "debugpy",
             "request": "launch",
             "cwd": "/home/fengelmann/Programming/opennerf/",
@@ -73,7 +73,17 @@
             "args": [],
         },
         {
-            "name": "semantics replica",
+            "name": "replica visualize",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "/home/fengelmann/Programming/opennerf/",
+            "program": "datasets/replica_visualize.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [],
+        },
+        {
+            "name": "replica semantics",
             "type": "debugpy",
             "request": "launch",
             "cwd": "/home/fengelmann/Programming/opennerf/",

@@ -73,6 +73,12 @@ ns-viewer --load-config outputs/path_to/config.yml
 ## Semantic Predictions
 
 
+## Coordinate Frames
+
+World coordinate frame: 
+
+Object coordinate frame: x - right, y - up, z - backwards (towards you)
+
 ## File Structure
 
 ```

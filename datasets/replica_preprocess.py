@@ -7,6 +7,7 @@ from typing import Optional, List
 import numpy as np
 import json
 import shutil
+import pymeshlab
 
 import replica
 
@@ -30,9 +31,12 @@ def process_replica(data: Path, output_dir: Path):
     2. Converts Record3D poses into the nerfstudio format.
     """
 
-    # copy mesh data
+    # convert mesh to triangle mesh (open3d can only read triangle meshes)
     mesh_path = data / '..' / f'{data.name}_mesh.ply'
-    shutil.copy2(mesh_path, output_dir)
+    ms = pymeshlab.MeshSet()
+    ms.load_new_mesh(str(mesh_path))
+    ms.apply_filter('meshing_poly_to_tri')
+    ms.save_current_mesh(str(output_dir / mesh_path.name), save_vertex_normal=True)
 
     verbose = True
     num_downscales = 3
