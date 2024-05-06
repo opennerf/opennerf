@@ -1,12 +1,22 @@
-# OpenNeRF: OpenSet 3D Neural Scene Segmentation with Pixel-Wise Features and Rendered Novel Views
+<span align="center">
+<h1> OpenNeRF: OpenSet 3D Neural Scene Segmentation<br>with Pixel-Wise Features and Rendered Novel Views</h1>
 
-Francis Engelmann, Fabian Manhardt, Michael Niemeyer, Keisuke Tateno, Marc Pollefeys, Federico Tombari
+<a href="https://francisengelmann.github.io">Francis Engelmann</a>,
+<a href="https://scholar.google.de/citations?user=bERItx8AAAAJ">Fabian Manhardt</a>,
+<a href="https://m-niemeyer.github.io">Michael Niemeyer</a>,
+<a href="https://scholar.google.com/citations?user=ml3laqEAAAAJ">Keisuke Tateno</a>,
+<a href="https://inf.ethz.ch/people/person-detail.pollefeys.html">Marc Pollefeys</a>,
+<a href="https://federicotombari.github.io">Federico Tombari</a>
 
-ICLR 2024
+<h3>ICLR 2024</h3>
+
+<a href="https://arxiv.org/abs/2404.03650">Paper</a> | <a href="http://opennerf.github.io">Project Page</a>
+
+</span>
 
 ![OpenNeRF Teaser](https://opennerf.github.io/static/images/teaser.png)
 
-### Setup
+## Installation
 
 #### Install NerfStudio
 
@@ -107,7 +117,7 @@ Object coordinate frame: x - right, y - up, z - backwards (towards you)
 ## BibTeX
 ```
 @inproceedings{engelmann2024opennerf,
-  title={{OpenNerf: Open Set 3D Neural Scene Segmentation with Pixel-Wise Features and Rendered Novel Views}},
+  title={{OpenNeRF: Open Set 3D Neural Scene Segmentation with Pixel-Wise Features and Rendered Novel Views}},
   author={Engelmann, Francis and Manhardt, Fabian and Niemeyer, Michael and Tateno, Keisuke and Pollefeys, Marc and Tombari, Federico},
   booktitle={International Conference on Learning Representations},
   year={2024}
