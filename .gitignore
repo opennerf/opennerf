@@ -2,3 +2,5 @@ data
 outputs
 *.egg-info/
 **/__pycache__/
+data_local
+outputs_local/

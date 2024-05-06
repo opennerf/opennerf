@@ -55,7 +55,7 @@ ln -s path/to/large_disk/outputs outputs
 ```
 
 ### Replica Dataset
-Download the Replica dataset pre-processed by [NiceSlam](https://pengsongyou.github.io/nice-slam) and transform it into nerfstudio format using these steps:
+Download the Replica dataset pre-processed by [NICE-SLAM](https://pengsongyou.github.io/nice-slam) and transform it into [nerfstudio](https://docs.nerf.studio) format using these steps:
 ```
 cd data
 wget https://cvg-data.inf.ethz.ch/nice-slam/data/Replica.zip
