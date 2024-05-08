@@ -82,12 +82,15 @@ ns-viewer --load-config outputs/path_to/config.yml
 
 ## Semantic Predictions
 
+```TODO```
+
+## ARKitScenes
+
+```TODO```
 
 ## Coordinate Frames
 
-World coordinate frame: 
-
-Object coordinate frame: x - right, y - up, z - backwards (towards you)
+Object coordinate frame: x - right, y - up, z - backwards (away from scene)
 
 ## File Structure
 
