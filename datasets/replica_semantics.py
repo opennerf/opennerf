@@ -36,6 +36,7 @@ import mediapy as media
 import numpy as np
 import torch
 import tyro
+import clip
 from jaxtyping import Float
 from rich import box, style
 from rich.panel import Panel
@@ -45,7 +46,7 @@ from rich.table import Table
 from torch import Tensor
 from typing_extensions import Annotated
 
-from nerfstudio.cameras.camera_paths import get_interpolated_camera_path, get_spiral_path
+from nerfstudio.cameras.camera_paths import get_interpolated_camera_path
 from nerfstudio.cameras.cameras import Cameras, CameraType
 from nerfstudio.data.datamanagers.base_datamanager import VanillaDataManager
 from nerfstudio.data.scene_box import SceneBox
@@ -235,8 +236,6 @@ def _render_trajectory_video(
     cameras.rescale_output_resolution(rendered_resolution_scaling_factor)
     cameras = cameras.to(pipeline.device)
 
-    fps = len(cameras) / seconds
-
     progress = Progress(
         TextColumn(":movie_camera: Rendering :movie_camera:"),
         BarColumn(),
@@ -264,8 +263,6 @@ def _render_trajectory_video(
     with ExitStack() as stack:
         writer = None
 
-        v = viz.Visualizer()
-        # scene = str(output_image_dir).split('_')[-1]
         scene = output_image_dir.parent.parent.name.split('_')[-1]
         mesh_path = Path('data/nerfstudio/') / f'replica_{scene}' / f'{scene}_mesh.ply'
         scene_point_cloud = o3d.io.read_point_cloud(str(mesh_path))
@@ -275,7 +272,7 @@ def _render_trajectory_video(
 
         colors_aggregate = np.zeros([points.shape[0], 3])
         semantics_aggregate = np.zeros([points.shape[0], len(replica.valid_class_ids)])  # aggregate predictions
-        openseg_aggregate = np.zeros([points.shape[0], 768])
+        openseg_aggregate = np.zeros([points.shape[0], 768], dtype=np.float32)
         count = np.zeros([points.shape[0]])  # number of predictions
 
         with progress:
@@ -316,202 +313,51 @@ def _render_trajectory_video(
                     depth_gt = depth_gt[::int(1/rendered_resolution_scaling_factor), ::int(1/rendered_resolution_scaling_factor)]
 
                 mask, image_coords_y, image_coords_x = project_points_to_image(points, depth_gt, c2w, intrinsics, distance_delta=0.1)
-                colors_aggregate[mask] += rgb[image_coords_y, image_coords_x].cpu().numpy()
-                openseg_aggregate[mask] += openseg[image_coords_y, image_coords_x].cpu().numpy()
+                colors_aggregate[mask] += rgb[image_coords_y, image_coords_x].detach().cpu().numpy()
+                openseg_aggregate[mask] += openseg[image_coords_y, image_coords_x].detach().cpu().numpy()
                 count[mask] += 1
-                print(count[mask].shape)
-                # v.add_points(f'colors_{camera_idx}', points[mask], rgb[image_coords_y, image_coords_x].cpu().numpy() * 255, normals[mask])
 
-                continue
+        count[count==0] = 1
+        colors_aggregate /= np.reshape(count, [-1, 1])
+        openseg_aggregate /= np.reshape(count, [-1, 1])
 
-                # from matplotlib.pylab import plt
-                # plt.imshow(depth_gt)
-                # plt.savefig('depth_gt.png')
-                # plt.imshow(depth)
-                # plt.savefig('depth_pr.png')
-                # dh = 2
-                # dw = 3
-                # d = np.reshape(np.array(range(dh * dw)), [dh, dw])
-                dh, dw = depth.shape[0], depth.shape[1]
+        from sklearn.decomposition import PCA
+        pca = PCA(n_components=3)
+        principalComponents = pca.fit_transform(openseg_aggregate - np.mean(openseg_aggregate, axis=0, keepdims=True))
+        openseg_colors = principalComponents - np.min(principalComponents, axis=0, keepdims=True)
+        openseg_colors /= np.max(openseg_colors, axis=0, keepdims=True)
 
-                def generate_pointcloud_method2(depth, cx, cy, fx, fy):
-                    depth = np.squeeze(depth)
-                    rows, cols = depth.shape
-                    c, r = np.meshgrid(np.arange(cols), np.arange(rows), sparse=True)
-                    valid = True  # (depth > 0) & (depth < 255)
-                    z = np.where(valid, depth, np.nan)
-                    x = np.where(valid, z * (c - cx) / fx, 0)
-                    y = np.where(valid, z * (r - cy) / fy, 0)
-                    return np.reshape(np.dstack((x, y, z)), [-1, 3])
+        with open(output_image_dir / 'openseg.npy', 'wb') as f:
+            np.save(f, openseg_aggregate)
 
-                dd = generate_pointcloud_method2(depth_gt, intrinsics[0, 2], intrinsics[1, 2], intrinsics[0, 0], intrinsics[1, 1])
-                pose = c2w
+        v = viz.Visualizer()
+        v.add_points(f'colors', points, colors_aggregate * 255, normals, resolution=4)
+        v.add_points(f'openseg', points, openseg_colors * 255, normals, resolution=4)
 
-                dd_homo = make_homo(dd)
-                mirror_z = np.eye(4)
-                mirror_z[2, 2] = -1
-                mirror_y = np.eye(4)
-                mirror_y[1, 1] = -1
-                cam2world = cameras.camera_to_worlds[camera_idx].cpu().numpy()
-                cam2world_dd = (cam2world @ mirror_y @ mirror_z @ dd_homo.T).T
-                c2w_dd = (c2w @ mirror_y @ mirror_z @ dd_homo.T).T
+        # Compute the maximum response per point over all semantic classes
 
-                pose_inv = invert_pose_matrix(pose)
-                points_homo = make_homo(points)
-                trafo_points = (pose_inv @ points_homo.T).T
+        # Compute CLIP text embedding
+        clip_pretrained, _ = clip.load("ViT-L/14@336px", device='cpu', jit=False)
+        semantic_class_names_tokenized = clip.tokenize(replica.class_names_reduced)  # tokenize
+        text_features = clip_pretrained.encode_text(semantic_class_names_tokenized)  # encode
+        text_features = text_features / text_features.norm(dim=-1, keepdim=True)  # normalize
+        text_features = text_features.detach().numpy()
+        semantic_classes_pr = np.argmax(openseg_aggregate.astype(np.float32) @ text_features.T, axis=-1)
+        semantic_classes_pr_colors = np.array([list(replica.SCANNET_COLOR_MAP_200.values())[i] for i in semantic_classes_pr])
 
-                v.add_points('rgb', points, colors * 255, normals)
-                v.add_points(f'rgb_{camera_idx}', points[mask], proj_point_colors * 255, normals[mask], visible=True)
-                v.add_points(f'cam2world_dd_{camera_idx}', cam2world_dd[:, 0:3], cam2world_dd[:, 0:3] * 255)
-                v.add_points(f'c2w_dd_{camera_idx}', c2w_dd[:, 0:3], c2w_dd[:, 0:3] * 255)
+        # save semantic predictions
+        with open(output_image_dir / f'semantics_{scene}.txt', 'w') as f:
+            np.savetxt(f, semantic_classes_pr.astype(int), fmt='%d', delimiter='\n')
 
-                # v.add_points(f'rgbt_{camera_idx}', trafo_points[mask, 0:3], proj_point_colors * 255, normals[mask], visible=True)
-                # v.add_points(f'dd_{camera_idx}', dd[:, 0:3], dd[:, 0:3] * 255)
-                v.save(f'replica/proj/{scene}')
-                print('asd')
-                
-                # v.add_points(f'dd_{camera_idx}', dd.T, depth_points[:, 0:3] * 255)
-                # v.add_points(f'dd_{camera_idx}', (depth_points @ c2w)[:, 0:3], depth_points[:, 0:3] * 255)
-                # semantics[mask] = proj_point_colors.cpu().numpy()
-                # semantics_count[mask] += 1.0
+        semantic_classes_gt_path = f'datasets/replica_gt_semantics/semantic_labels_{scene}.txt'
+        with open(semantic_classes_gt_path) as f:
+            semantic_classes_gt = [int(l.rstrip()) for l in f.readlines()]
+            semantic_classes_gt_colors = np.array([list(replica.SCANNET_COLOR_MAP_200.values())[replica.map_to_reduced[i]] for i in semantic_classes_gt])
 
-
-        # render_image = []
-        # for rendered_output_name in rendered_output_names:
-        #     if rendered_output_name not in outputs and rendered_output_name != 'semantics':
-        #         CONSOLE.rule("Error", style="red")
-        #         CONSOLE.print(f"Could not find {rendered_output_name} in the model outputs", justify="center")
-        #         CONSOLE.print(
-        #             f"Please set --rendered_output_name to one of: {outputs.keys()}", justify="center"
-        #         )
-        #         sys.exit(1)
-        #     if rendered_output_name != 'semantics':
-        #       output_image = outputs[rendered_output_name]
-
-        #     # is_depth = rendered_output_name.find("depth") != -1
-        #     # if is_depth:
-        #     #     output_image = (
-        #     #         colormaps.apply_depth_colormap(
-        #     #             output_image,
-        #     #             accumulation=outputs["accumulation"],
-        #     #             near_plane=depth_near_plane,
-        #     #             far_plane=depth_far_plane,
-        #     #             colormap_options=colormap_options,
-        #     #         )
-        #     #         .cpu()
-        #     #         .numpy()
-        #     #     )
-        #     elif rendered_output_name == "semantics":
-        #         relevancies = [k for k in outputs.keys() if k.startswith('relevancy')]
-        #         relevancies = torch.cat([outputs[k] for k in relevancies], dim=-1)
-
-        #         output_image = torch.argmax(relevancies, dim=-1, keepdim=True).float()
-        #         output_image = output_image.cpu().numpy().astype(int)
-        #         output_image = np.array([v for v in replica.SCANNET_COLOR_MAP_200.values()])[output_image]
-        #         output_image = np.squeeze(output_image) / 255.0
-
-        #         # output_image = (
-        #         #     colormaps.apply_colormap(
-        #         #         image=output_image,
-        #         #         colormap_options=colormap_options,
-        #         #     )
-        #         #     .cpu()
-        #         #     .numpy()x
-        #         # )
-
-        #         if project_to_pointcloud:
-        #             transform = pipeline.datamanager.train_dataparser_outputs.as_dict()['dataparser_transform'].cpu().numpy()
-        #             scale_factor = pipeline.datamanager.train_dataparser_outputs.as_dict()['dataparser_scale']                            
-        #             transform_inv = invert_pose_matrix(transform)
-        #             c2w = cameras.camera_to_worlds[camera_idx].cpu().numpy()
-        #             c2w = np.concatenate([c2w, np.array([[0.0, 0.0, 0.0, 1.0]])])
-        #             c2w[:3, 3] /= scale_factor
-        #             c2w = transform_inv @ c2w
-        #             intrinsics = pipeline.datamanager.train_dataset.cameras.get_intrinsics_matrices()[camera_idx].cpu().numpy()
-        #             intrinsics *= rendered_resolution_scaling_factor
-        #             intrinsics[2, 2] = 1.0
-        #             depth = outputs["accumulation"].cpu().numpy() / scale_factor
-        #             mask, proj_point_colors = project_points_to_image(points, relevancies, depth, c2w, intrinsics)
-
-        #             semantics[mask] = proj_point_colors.cpu().numpy()
-        #             semantics_count[mask] += 1.0
-
-        #             # v.add_points(f'rgb_{camera_idx}', points[mask], proj_point_colors * 255, normals[mask])
-
-        #             origin = c2w @ np.array([0, 0, 0, 1])
-        #             v.add_arrow(f'{camera_idx};Arrow_1', start=origin, end=c2w @ np.array([0.1, 0.0, 0.0, 1]), color=np.array([255, 0, 0]), stroke_width=0.005, head_width=0.01)
-        #             v.add_arrow(f'{camera_idx};Arrow_2', start=origin, end=c2w @ np.array([0.0, 0.1, 0.0, 1]), color=np.array([0, 255, 0]), stroke_width=0.005, head_width=0.01)
-        #             v.add_arrow(f'{camera_idx};Arrow_3', start=origin, end=c2w @ np.array([0.0, 0.0, 0.1, 1]), color=np.array([0, 0, 255]), stroke_width=0.005, head_width=0.01)
-        #     else:
-        #         if output_format != "npy":
-        #             output_image = (
-        #                 colormaps.apply_colormap(
-        #                     image=output_image,
-        #                     colormap_options=colormap_options,
-        #                 )
-        #                 .cpu()
-        #                 .numpy()
-        #             )
-        #         else:
-        #             output_image = output_image.cpu().numpy()
-        #             output_image = output_image / np.expand_dims((np.linalg.norm(output_image, axis=-1) + 1e-5), -1)
-        #     render_image.append(output_image)
-        # render_image = np.concatenate(render_image, axis=1)
-
-        # if output_format == "npy":
-        #     np.save(output_image_dir / f"{camera_idx:05d}.npy", np.float16(render_image))
-        # if output_format == "images":
-        #     if image_format == "png":
-        #         media.write_image(output_image_dir / f"{camera_idx:05d}.png", render_image, fmt="png")
-        #     if image_format == "jpeg":
-        #         media.write_image(
-        #             output_image_dir / f"{camera_idx:05d}.jpg", render_image, fmt="jpeg", quality=jpeg_quality
-        #         )
-        # if output_format == "video":
-        #     if writer is None:
-        #         render_width = int(render_image.shape[1])
-        #         render_height = int(render_image.shape[0])
-        #         writer = stack.enter_context(
-        #             media.VideoWriter(
-        #                 path=output_filename,
-        #                 shape=(render_height, render_width),
-        #                 fps=fps,
-        #             )
-        #         )
-        #     writer.add_image(render_image)
-        if True:
-            count[count==0] = 1
-            colors_aggregate /= np.reshape(count, [-1, 1])
-            openseg_aggregate /= np.reshape(count, [-1, 1])
-
-            from sklearn.decomposition import PCA
-            pca = PCA(n_components=3)
-            principalComponents = pca.fit_transform(openseg_aggregate - np.mean(openseg_aggregate, axis=0, keepdims=True))
-            openseg_colors = principalComponents - np.min(principalComponents, axis=0, keepdims=True)
-            openseg_colors /= np.max(openseg_colors, axis=0, keepdims=True)
-
-            with open(output_image_dir / 'openseg.npy', 'wb') as f:
-                np.save(f, openseg_aggregate)
-
-            v.add_points(f'colors', points, colors_aggregate * 255, normals, resolution=4)
-            v.add_points(f'openseg', points, openseg_colors * 255, normals, resolution=4)
-            blender_path = '/Applications/Blender.app/Contents/MacOS/Blender'
-            v.save(output_image_dir / 'vis', show_in_blender=True, blender_executable_path=blender_path)
-
-        if False:
-            semantics_count[semantics_count==0] = 1
-            semantics /= np.reshape(semantics_count, [-1, 1])
-            semantic_classes = np.argmax(semantics, axis=-1)
-            semantic_classes[np.max(semantics, axis=-1) < 0.0001] = 51
-            semantic_colors = np.array([v for v in replica.SCANNET_COLOR_MAP_200.values()])[semantic_classes]
-            v.add_points(f'semantics', points, semantic_colors, normals)
-            v.save(f'replica/proj/{scene}')
-            with open(f'replica/predictions/{scene}_relevancies.npy', 'wb') as f:
-                np.save(f, semantics)
-            with open(f'replica/predictions/{scene}.npy', 'wb') as f:
-                np.save(f, semantic_classes)
-            with open(f'replica/predictions/{scene}.txt', 'w') as f:
-                np.savetxt(f, semantic_classes.astype(int), fmt='%d', delimiter='\n')
+        mask = points[:, 2] < np.max(points[:, 2]) * 0.9  # cut off the ceiling so we can easy see inside the scene
+        v.add_points(f'semantics_pr', points[mask], semantic_classes_pr_colors[mask], normals[mask], resolution=4)
+        v.add_points(f'semantics_gt', points[mask], semantic_classes_gt_colors[mask], normals[mask], resolution=4)
+        v.save(output_image_dir / 'vis')
 
     table = Table(
         title=None,
@@ -787,7 +633,6 @@ Commands = tyro.conf.FlagConversionOff[
         Annotated[RenderInterpolated, tyro.conf.subcommand(name="interpolate")],
     ]
 ]
-
 
 def entrypoint():
     """Entrypoint for use with pyproject scripts."""

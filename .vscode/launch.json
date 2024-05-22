@@ -91,16 +91,14 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "args": [
-                "interpolate",  // camera-path, 
+                "interpolate",
                 "--interpolation-steps=1",
                 "--pose_source=train",
                 "--load-config=/home/fengelmann/Programming/opennerf/outputs_local/replica_office0/opennerf/2024-05-01_100328/config.yml",
-                // "--camera-path-filename=/home/fengelmann/Programming/opennerf/data/nerfstudio/replica_office0/transforms.json",
                 "--colormap-options.colormap=pca",
-                // "--output-format=npy",
                 "--output_path=/home/fengelmann/Programming/opennerf/outputs_local/replica_office0/opennerf/2024-05-01_100328/",
                 "--rendered-output-names=rgb",
-                "--eval-num-rays-per-chunk=500", // can we improve this?
+                "--eval-num-rays-per-chunk=500",
                 "--downscale-factor=2",
                 ],
         },
