@@ -26,7 +26,7 @@ class OpenSegDataloader(FeatureDataloader):
         # extractor = ViTExtractor(self.dino_model_type, self.dino_stride)
         # preproc_image_lst = extractor.preprocess(image_list, self.dino_load_size)[0].to(self.device)
 
-        saved_model_path = '~/misc/openseg_exported_clip'
+        saved_model_path = 'models/openseg_exported_clip'
         saved_model_path = os.path.realpath(os.path.expanduser(saved_model_path))
         openseg_model = tf2.saved_model.load(saved_model_path, tags=[tf.saved_model.tag_constants.SERVING],)
 

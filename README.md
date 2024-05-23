@@ -45,14 +45,17 @@ python -m pip install -e .
 ns-install-cli
 ```
 
-## Data preparation
+## Data preparation and OpenSeg Model
 
 The datasets and saved NeRF models require significant disk space.
 Let's link them to some (remote) larger storage:
 ```
 ln -s path/to/large_disk/data data
+ln -s path/to/large_disk/models models
 ln -s path/to/large_disk/outputs outputs
 ```
+
+Download the OpenSeg feature extractor model from [here](https://drive.google.com/file/d/1DgyH-1124Mo8p6IUJ-ikAiwVZDDfteak/view?usp=sharing) and unzip it into `./models`.
 
 ### Replica Dataset
 Download the Replica dataset pre-processed by [NICE-SLAM](https://pengsongyou.github.io/nice-slam) and transform it into [nerfstudio](https://docs.nerf.studio) format using these steps:
