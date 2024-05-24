@@ -39,8 +39,9 @@
             "--steps-per-eval-image=500000",
             "--steps-per-eval-all-images=500000",
             "--pipeline.datamanager.train-num-rays-per-batch=2048",
-            "--data=/home/fengelmann/Programming/opennerf/data_local/nerfstudio/replica_office0",
-            "--output-dir=/home/fengelmann/Programming/opennerf/outputs_local"
+            "--data=/home/fengelmann/Programming/opennerf/data/nerfstudio/replica_office0",
+            "--output-dir=/home/fengelmann/Programming/opennerf/outputs",
+            "--timestamp=run0",
             ],
         },
         {
@@ -101,6 +102,16 @@
                 "--eval-num-rays-per-chunk=500",
                 "--downscale-factor=2",
                 ],
+        },
+        {
+            "name": "replica train_eval",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "/home/fengelmann/Programming/opennerf/",
+            "program": "scripts/train_eval_replica_semantics.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [],
         },
     ]
 }

@@ -83,9 +83,17 @@ To view the optimized NeRF, you can launch the viewer separately:
 ns-viewer --load-config outputs/path_to/config.yml
 ```
 
-## Semantic Predictions
+## Semantic Predictions and Evaluation on Replica
 
-```TODO```
+```
+scripts/train_eval_replica_semantics.py
+```
+
+This version of the code produces the following 3D semantic segmentation scores:
+
+| All mIoU (mAcc) | Head mIoU (mAcc) | Common mIoU (mAcc) | Tail mIoU (mAcc) |
+|-----------------|------------------|--------------------|------------------|
+| 18.74% (31.87%) | 30.26% (43.89%)  | 20.07% (33.52%)    | 5.88% (18.19%)   |
 
 ## ARKitScenes
 

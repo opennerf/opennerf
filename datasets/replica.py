@@ -9,7 +9,7 @@ class_popularity = [47, 18, 22, 13,  5, 37, 40, 50, 49, 24, 21, 30,  2, 43, 11,
                     29,  4, 44, 17,  3, 46,  1, 38, 28, 23, 19, 16, 26, 36, 45,
                     32,  0, 33, 25, 31, 27, 20, 48,  6,  8, 14, 35, 42, 10, 41,
                     34,  7, 12,  9, 15, 39]
-num_classes = len(class_popularity)  # 51
+num_classes = len(valid_class_ids)  # 51
 
 map_to_reduced = {
 93:	0,
@@ -123,11 +123,11 @@ class_names_reduced = [
     ]
 
 class_names = [
-    '0',
-    'backpack',
-    'base-cabinet',
-    'basket',
-    'bathtub',
+    '0',                # 0
+    'backpack',         # 1
+    'base-cabinet',     # 2
+    'basket',           # 3
+    'bathtub',          # 4
     'beam',
     'beanbag',
     'bed',

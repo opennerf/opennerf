@@ -4,3 +4,4 @@ outputs
 **/__pycache__/
 data_local
 outputs_local/
+models
