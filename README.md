@@ -91,9 +91,26 @@ python scripts/train_eval_replica_semantics.py
 
 This version of the code corresponds to entry (2) "Render & Project" in Table 2 of the paper and produces the following 3D semantic segmentation scores on the Replica dataset:
 
-| All mIoU (mAcc) | Head mIoU (mAcc) | Common mIoU (mAcc) | Tail mIoU (mAcc) |
-|-----------------|------------------|--------------------|------------------|
-| 18.74% (31.87%) | 30.26% (43.89%)  | 20.07% (33.52%)    | 5.88% (18.19%)   |
+<table>
+  <tr>
+    <td colspan=2 align="center">All</td>
+    <td colspan=2 align="center">Head</td>
+    <td colspan=2 align="center">Common</td>
+    <td colspan=2 align="center">Tail</td>
+  </tr>
+  <tr>
+    <td align="center">mIoU</td><td align="center">mAcc</td>
+    <td align="center">mIoU</td><td align="center">mAcc</td>
+    <td align="center">mIoU</td><td align="center">mAcc</td>
+    <td align="center">mIoU</td><td align="center">mAcc</td>
+  </tr>
+  <tr>
+    <td align="center">18.74%</td><td align="center">31.87%</td>
+    <td align="center">30.26%</td><td align="center">43.89%</td>
+    <td align="center">20.07%</td><td align="center">33.52%</td>
+    <td align="center">5.88%</td><td align="center">18.19%</td>
+  </tf>
+</table>
 
 ## ARKitScenes
 
