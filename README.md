@@ -93,10 +93,10 @@ This version of the code corresponds to entry (2) "Render & Project" in Table 2 
 
 <table>
   <tr>
-    <td colspan=2 align="center">All</td>
-    <td colspan=2 align="center">Head</td>
-    <td colspan=2 align="center">Common</td>
-    <td colspan=2 align="center">Tail</td>
+    <td colspan=2 align="center"><b>All</b></td>
+    <td colspan=2 align="center"><b>Head</b></td>
+    <td colspan=2 align="center"><b>Common</b></td>
+    <td colspan=2 align="center"><b>Tail</b></td>
   </tr>
   <tr>
     <td align="center">mIoU</td><td align="center">mAcc</td>
