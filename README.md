@@ -86,10 +86,10 @@ ns-viewer --load-config outputs/path_to/config.yml
 ## Semantic Predictions and Evaluation on Replica
 
 ```
-scripts/train_eval_replica_semantics.py
+python scripts/train_eval_replica_semantics.py
 ```
 
-This version of the code produces the following 3D semantic segmentation scores:
+This version of the code corresponds to entry (2) "Render & Project" in Table 2 of the paper and produces the following 3D semantic segmentation scores on the Replica dataset:
 
 | All mIoU (mAcc) | Head mIoU (mAcc) | Common mIoU (mAcc) | Tail mIoU (mAcc) |
 |-----------------|------------------|--------------------|------------------|
@@ -101,7 +101,10 @@ This version of the code produces the following 3D semantic segmentation scores:
 
 ## Coordinate Frames
 
-Object coordinate frame: x - right, y - up, z - backwards (away from scene)
+Object coordinate frame:
+  - X - right
+  - Y - up
+  - Z - backwards (away from scene, towards you)
 
 ## File Structure
 
