@@ -14,36 +14,37 @@ def process_txt(filename):
         lines = [line.rstrip() for line in lines]
     return lines
 
+
 def train_scene(scene, experiment_name):
     cmd = [os.path.join(CONDA_DIR, "bin/python"),
            os.path.join(CONDA_DIR, "lib/python3.10/site-packages/nerfstudio/scripts/train.py"),
-           "opennerf",
-            "--vis=wandb",  # viewer+wandb
-            f"--experiment-name=replica_{scene}",
-            "--viewer.num-rays-per-chunk=2048",
-            "--steps-per-eval-batch=500000",
-            "--steps-per-eval-image=500000",
-            "--steps-per-eval-all-images=500000",
-            "--max-num-iterations=30000",  # 30000
-            "--pipeline.datamanager.train-num-rays-per-batch=2048",
-            f"--data={PREFIX}/data/nerfstudio/replica_{scene}",
-            "--output-dir={PREFIX}/outputs",
-            f"--timestamp={experiment_name}"]
+           f"opennerf",
+           f"--vis=wandb",  # viewer+wandb
+           f"--experiment-name=replica_{scene}",
+           f"--viewer.num-rays-per-chunk=2048",
+           f"--steps-per-eval-batch=500000",
+           f"--steps-per-eval-image=500000",
+           f"--steps-per-eval-all-images=500000",
+           f"--max-num-iterations=30000",  # 30000
+           f"--pipeline.datamanager.train-num-rays-per-batch=2048",
+           f"--data={PREFIX}/data/nerfstudio/replica_{scene}",
+           f"--output-dir={PREFIX}/outputs",
+           f"--timestamp={experiment_name}"]
     subprocess.run(cmd)
 
 
 def eval_scene(scene, experiment_name):
     cmd = ["/home/fengelmann/miniconda3/envs/opennerf/bin/python",
-        "/home/fengelmann/Programming/opennerf/datasets/replica_semantics.py",
-        "interpolate",
-        "--interpolation-steps=1",
-        "--pose_source=train",
+        f"/home/fengelmann/Programming/opennerf/datasets/replica_semantics.py",
+        f"interpolate",
+        f"--interpolation-steps=1",
+        f"--pose_source=train",
         f"--load-config={PREFIX}/outputs/replica_{scene}/opennerf/{experiment_name}/config.yml",
-        "--colormap-options.colormap=pca",
+        f"--colormap-options.colormap=pca",
         f"--output_path={PREFIX}/outputs/replica_{scene}/opennerf/{experiment_name}/",
-        "--rendered-output-names=rgb",
-        "--eval-num-rays-per-chunk=500",
-        "--downscale-factor=2",]
+        f"--rendered-output-names=rgb",
+        f"--eval-num-rays-per-chunk=500",
+        f"--downscale-factor=2",]
     subprocess.run(cmd)
 
 
@@ -86,6 +87,7 @@ def eval_semantics(experiment_name):
         print(f'{split}: \t {np.mean(acc_values[17 * i:17 * (i + 1)]):.2%}')
         print('---')
 
+
 def evaluate_scan(pr_file, gt_file, confusion):
 
     pr_ids = np.array(process_txt(pr_file), dtype=np.int64)
@@ -114,7 +116,7 @@ def get_iou(label_id, confusion):
 
 
 def main():
-    experiment_name = 'run_0'
+    experiment_name = 'run_debug'
     for scene in replica.scenes:
         train_scene(scene, experiment_name)
         eval_scene(scene, experiment_name)
