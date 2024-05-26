@@ -95,6 +95,7 @@ This version of the code corresponds to entry (2) "Render & Project" in Table 2 
 
 <table>
   <tr>
+    <td>Run</td>
     <td colspan=2 align="center"><b>All</b></td>
     <td colspan=2 align="center"><b>Head</b></td>
     <td colspan=2 align="center"><b>Common</b></td>
@@ -107,11 +108,20 @@ This version of the code corresponds to entry (2) "Render & Project" in Table 2 
     <td align="center">mIoU</td><td align="center">mAcc</td>
   </tr>
   <tr>
+    <td>Run 0</td>
     <td align="center">18.74%</td><td align="center">31.87%</td>
     <td align="center">30.26%</td><td align="center">43.89%</td>
     <td align="center">20.07%</td><td align="center">33.52%</td>
     <td align="center">5.88%</td><td align="center">18.19%</td>
+  </tr>
+  <tr>
+    <td>Run 1</td>
+    <td align="center">19.684%</td><td align="center">32.68%</td>
+    <td align="center">30.76%</td><td align="center">44.70%</td>
+    <td align="center">20.84%</td><td align="center">34.16%</td>
+    <td align="center">7.43%</td><td align="center">19.17%</td>
   </tf>
+
 </table>
 
 ## ARKitScenes
