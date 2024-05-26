@@ -95,13 +95,14 @@ This version of the code corresponds to entry (2) "Render & Project" in Table 2 
 
 <table>
   <tr>
-    <td>Run</td>
+    <td></td>
     <td colspan=2 align="center"><b>All</b></td>
     <td colspan=2 align="center"><b>Head</b></td>
     <td colspan=2 align="center"><b>Common</b></td>
     <td colspan=2 align="center"><b>Tail</b></td>
   </tr>
   <tr>
+    <td></td>
     <td align="center">mIoU</td><td align="center">mAcc</td>
     <td align="center">mIoU</td><td align="center">mAcc</td>
     <td align="center">mIoU</td><td align="center">mAcc</td>
