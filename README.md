@@ -117,7 +117,7 @@ This version of the code corresponds to entry (2) "Render & Project" in Table 2 
   </tr>
   <tr>
     <td>Run 1</td>
-    <td align="center">19.684%</td><td align="center">32.68%</td>
+    <td align="center">19.68%</td><td align="center">32.68%</td>
     <td align="center">30.76%</td><td align="center">44.70%</td>
     <td align="center">20.84%</td><td align="center">34.16%</td>
     <td align="center">7.43%</td><td align="center">19.17%</td>
