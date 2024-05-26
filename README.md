@@ -83,7 +83,9 @@ To view the optimized NeRF, you can launch the viewer separately:
 ns-viewer --load-config outputs/path_to/config.yml
 ```
 
-## Semantic Predictions and Evaluation on Replica
+## Replica: Semantic Predictions and Evaluation
+
+Adapt the global variables `CONDA_DIR` and `PREFIX` in `train_eval_replica_semantics.py`. Then run it:
 
 ```
 python scripts/train_eval_replica_semantics.py
