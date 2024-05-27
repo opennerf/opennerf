@@ -121,8 +121,14 @@ This version of the code corresponds to entry (2) "Render & Project" in Table 2 
     <td align="center">30.76%</td><td align="center">44.70%</td>
     <td align="center">20.84%</td><td align="center">34.16%</td>
     <td align="center">7.43%</td><td align="center">19.17%</td>
-  </tf>
-
+  </tr>
+  <tr>
+    <td>Run 2</td>
+    <td align="center">18.80%</td><td align="center">31.72%</td>
+    <td align="center">30.36%</td><td align="center">44.02%</td>
+    <td align="center">19.63%</td><td align="center">32.71%</td>
+    <td align="center">6.41%</td><td align="center">18.43%</td>
+  </tr>
 </table>
 
 ## ARKitScenes
