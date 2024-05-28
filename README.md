@@ -168,11 +168,12 @@ Object coordinate frame:
 ```
 
 ## BibTeX
-```
+If you find our code or paper useful, please cite:
+```bibtex
 @inproceedings{engelmann2024opennerf,
-  title={{OpenNeRF: Open Set 3D Neural Scene Segmentation with Pixel-Wise Features and Rendered Novel Views}},
-  author={Engelmann, Francis and Manhardt, Fabian and Niemeyer, Michael and Tateno, Keisuke and Pollefeys, Marc and Tombari, Federico},
-  booktitle={International Conference on Learning Representations},
-  year={2024}
+  title     = {{OpenNeRF: Open Set 3D Neural Scene Segmentation with Pixel-Wise Features and Rendered Novel Views}},
+  author    = {Engelmann, Francis and Manhardt, Fabian and Niemeyer, Michael and Tateno, Keisuke and Pollefeys, Marc and Tombari, Federico},
+  booktitle = {International Conference on Learning Representations},
+  year      = {2024}
 }
 ```
