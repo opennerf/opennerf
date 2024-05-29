@@ -26,6 +26,8 @@ def train_scene(scene, experiment_name):
            f"--steps-per-eval-image=500000",
            f"--steps-per-eval-all-images=500000",
            f"--max-num-iterations=30000",  # 30000
+           f"--pipeline.model.openseg-loss-weight=1.0",
+           f"--pipeline.model.dino-loss-weight=0.0",
            f"--pipeline.datamanager.train-num-rays-per-batch=2048",
            f"--data={PREFIX}/data/nerfstudio/replica_{scene}",
            f"--output-dir={PREFIX}/outputs",
@@ -34,8 +36,8 @@ def train_scene(scene, experiment_name):
 
 
 def eval_scene(scene, experiment_name):
-    cmd = ["/home/fengelmann/miniconda3/envs/opennerf/bin/python",
-        f"/home/fengelmann/Programming/opennerf/datasets/replica_semantics.py",
+    cmd = [f"{CONDA_DIR}/bin/python",
+        f"{PREFIX}/datasets/replica_semantics.py",
         f"interpolate",
         f"--interpolation-steps=1",
         f"--pose_source=train",
@@ -116,7 +118,7 @@ def get_iou(label_id, confusion):
 
 
 def main():
-    experiment_name = 'run_debug'
+    experiment_name = 'w_dino_0'
     for scene in replica.scenes:
         train_scene(scene, experiment_name)
         eval_scene(scene, experiment_name)
