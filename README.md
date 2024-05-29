@@ -95,23 +95,40 @@ This version of the code corresponds to entry (2) "Render & Project" in Table 2 
 
 <table>
   <tr>
+    <td></td>
     <td colspan=2 align="center"><b>All</b></td>
     <td colspan=2 align="center"><b>Head</b></td>
     <td colspan=2 align="center"><b>Common</b></td>
     <td colspan=2 align="center"><b>Tail</b></td>
   </tr>
   <tr>
+    <td></td>
     <td align="center">mIoU</td><td align="center">mAcc</td>
     <td align="center">mIoU</td><td align="center">mAcc</td>
     <td align="center">mIoU</td><td align="center">mAcc</td>
     <td align="center">mIoU</td><td align="center">mAcc</td>
   </tr>
   <tr>
+    <td>Run 0</td>
     <td align="center">18.74%</td><td align="center">31.87%</td>
     <td align="center">30.26%</td><td align="center">43.89%</td>
     <td align="center">20.07%</td><td align="center">33.52%</td>
     <td align="center">5.88%</td><td align="center">18.19%</td>
-  </tf>
+  </tr>
+  <tr>
+    <td>Run 1</td>
+    <td align="center">19.68%</td><td align="center">32.68%</td>
+    <td align="center">30.76%</td><td align="center">44.70%</td>
+    <td align="center">20.84%</td><td align="center">34.16%</td>
+    <td align="center">7.43%</td><td align="center">19.17%</td>
+  </tr>
+  <tr>
+    <td>Run 2</td>
+    <td align="center">18.80%</td><td align="center">31.72%</td>
+    <td align="center">30.36%</td><td align="center">44.02%</td>
+    <td align="center">19.63%</td><td align="center">32.71%</td>
+    <td align="center">6.41%</td><td align="center">18.43%</td>
+  </tr>
 </table>
 
 ## ARKitScenes
@@ -151,11 +168,12 @@ Object coordinate frame:
 ```
 
 ## BibTeX
-```
+If you find our code or paper useful, please cite:
+```bibtex
 @inproceedings{engelmann2024opennerf,
-  title={{OpenNeRF: Open Set 3D Neural Scene Segmentation with Pixel-Wise Features and Rendered Novel Views}},
-  author={Engelmann, Francis and Manhardt, Fabian and Niemeyer, Michael and Tateno, Keisuke and Pollefeys, Marc and Tombari, Federico},
-  booktitle={International Conference on Learning Representations},
-  year={2024}
+  title     = {{OpenNeRF: Open Set 3D Neural Scene Segmentation with Pixel-Wise Features and Rendered Novel Views}},
+  author    = {Engelmann, Francis and Manhardt, Fabian and Niemeyer, Michael and Tateno, Keisuke and Pollefeys, Marc and Tombari, Federico},
+  booktitle = {International Conference on Learning Representations},
+  year      = {2024}
 }
 ```
