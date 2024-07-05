@@ -137,35 +137,10 @@ This version of the code corresponds to entry (2) "Render & Project" in Table 2 
 
 ## Coordinate Frames
 
-Object coordinate frame:
-  - X - right
-  - Y - up
-  - Z - backwards (away from scene, towards you)
+![OpenNeRF Teaser](https://opennerf.github.io/static/images/coordinate_systems.jpg)
 
-## File Structure
-
-```
-├── opennerf
-│   ├── 
-│   ├── __init__.py
-│   ├── data
-│   │   ├── utils
-│   │   │   ├── dino_dataloader.py
-│   │   │   ├── dino_extractor.py
-│   │   │   ├── feature_dataloader.py
-│   │   │   ├── openseg_dataloader.py
-│   │   │   ├── openseg_extractor.py
-│   ├── encoders
-│   │   ├── image_encoder.py
-│   ├── opennerf_config.py
-│   ├── opennerf_datamanger.py
-│   ├── opennerf_field.py
-│   ├── opennerf_fieldheadnames.py
-│   ├── opennerf_model.py
-│   ├── opennerf_pipeline.py
-│   ├── opennerf_renderers.py
-├── pyproject.toml
-```
+## Run Online Demo
+python web/waitress_server.py
 
 ## BibTeX
 If you find our code or paper useful, please cite:
