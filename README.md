@@ -137,7 +137,7 @@ This version of the code corresponds to entry (2) "Render & Project" in Table 2 
 
 ## Coordinate Frames
 
-![OpenNeRF Teaser](https://opennerf.github.io/static/images/coordinate_systems.jpg)
+![Coordindate_systems](https://opennerf.github.io/static/images/coordinate_systems.jpg)
 
 ## Run Online Demo
 python web/waitress_server.py
