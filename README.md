@@ -10,7 +10,9 @@
 
 <h3>ICLR 2024</h3>
 
-<a href="https://arxiv.org/abs/2404.03650">Paper</a> | <a href="http://opennerf.github.io">Project Page</a>
+<a href="https://arxiv.org/abs/2404.03650">Paper</a> |
+<a href="http://opennerf.github.io">Project Page</a> |
+<a href="http://opennerf.github.io/demo.html">Demo</a>
 
 </span>
 
