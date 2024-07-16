@@ -133,16 +133,10 @@ This version of the code corresponds to entry (2) "Render & Project" in Table 2 
   </tr>
 </table>
 
-## ARKitScenes
-
-```TODO```
-
 ## Coordinate Frames
 
 ![Coordindate_systems](https://opennerf.github.io/static/images/coordinate_systems.jpg)
 
-## Run Online Demo
-python web/waitress_server.py
 
 ## BibTeX
 If you find our code or paper useful, please cite:
