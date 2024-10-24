@@ -69,6 +69,10 @@ class OpenNerfDataManager(VanillaDataManager):  # pylint: disable=abstract-metho
         super().__init__(
             config=config, device=device, test_mode=test_mode, world_size=world_size, local_rank=local_rank, **kwargs
         )
+
+        if test_mode == 'inference':
+            return
+
         images = [self.train_dataset[i]["image"].permute(2, 0, 1)[None, ...] for i in range(len(self.train_dataset))]
         images = torch.cat(images)
 
@@ -77,9 +81,6 @@ class OpenNerfDataManager(VanillaDataManager):  # pylint: disable=abstract-metho
         openseg_cache_path = Path(osp.join(cache_dir, "openseg.npy"))
         # NOTE: cache config is sensitive to list vs. tuple, because it checks for dict equality
         image_pathes = self.train_dataset._dataparser_outputs.image_filenames
-
-        if test_mode == 'inference':
-            return
 
         self.dino_dataloader = DinoDataloader(
             image_list=images,

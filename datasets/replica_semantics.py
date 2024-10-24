@@ -21,7 +21,8 @@ from __future__ import annotations
 import json
 import os
 import shutil
-import cv2
+# import cv2
+import glob
 
 import struct
 import sys
@@ -119,7 +120,7 @@ def project_points_to_image(points, depth, pose, intrinsics, distance_delta=10.0
     image_coords = proj_points[mask]  # N x 2
     image_coords_x = image_coords[:, 0]
     image_coords_y = image_coords[:, 1]
-    proj_points_min_dist = depth[image_coords_y, image_coords_x]
+    proj_points_min_dist = depth[image_coords_y, image_coords_x]  # iphone 270x480, replica 340x600
     image_mask_dist = (
         np.abs(np.abs(np.squeeze(proj_points_min_dist)) - trafo_points_z) < distance_delta
     )
@@ -130,6 +131,7 @@ def project_points_to_image(points, depth, pose, intrinsics, distance_delta=10.0
     mask[mask] = image_mask_dist
     
     # v.add_points(f'trafo_points', trafo_points[mask, 0:3], proj_point_colors.cpu().numpy() * 255, visible=True)
+    # v.add_points('points_masked', points[mask])
     # v.save(f'replica/proj/office0')
 
     return mask, image_coords_y[image_mask_dist], image_coords_x[image_mask_dist]
@@ -263,9 +265,9 @@ def _render_trajectory_video(
     with ExitStack() as stack:
         writer = None
 
-        scene = output_image_dir.parent.parent.name.split('_')[-1]
-        mesh_path = Path('data/nerfstudio/') / f'replica_{scene}' / f'{scene}_mesh.ply'
-        scene_point_cloud = o3d.io.read_point_cloud(str(mesh_path))
+        dataset, scene = output_image_dir.parent.parent.name.split('_', 1)
+        mesh_path = glob.glob(str(Path('data/nerfstudio/') / f'{dataset}_{scene}' / f'{scene}*.ply'))[0]
+        scene_point_cloud = o3d.io.read_point_cloud(mesh_path)
         points = np.array(scene_point_cloud.points)
         colors = np.array(scene_point_cloud.colors)
         normals = np.array(scene_point_cloud.normals)
@@ -277,8 +279,8 @@ def _render_trajectory_video(
 
         with progress:
             for camera_idx in progress.track(range(cameras.size), description=""):
-                # if camera_idx > 10:  # debug
-                #  break
+                # if camera_idx > 3:  # debug
+                #   break
 
                 camera_ray_bundle = cameras.generate_rays(camera_indices=camera_idx, aabb_box=None)
                 with torch.no_grad():
@@ -298,13 +300,15 @@ def _render_trajectory_video(
                 intrinsics *= rendered_resolution_scaling_factor
                 intrinsics[2, 2] = 1.0
                 depth = outputs["depth"].cpu().numpy() / scale_factor
-                
-                image_gt_path = f'data/nerfstudio/replica_{scene}/images/frame_{str(camera_idx + 1).zfill(5)}.jpg'
-                depth_gt_path = f'data/nerfstudio/replica_{scene}/depths/frame_{str(camera_idx + 1).zfill(5)}.png'
+
+                image_gt_path = f'data/nerfstudio/{dataset}_{scene}/images/frame_{str(camera_idx + 1).zfill(5)}.jpg'
+                depth_gt_path = f'data/nerfstudio/{dataset}_{scene}/depths/frame_{str(camera_idx + 1).zfill(5)}.png'
 
                 image_gt = media.read_image(image_gt_path)
-                depth_gt = media.read_image(depth_gt_path, dtype=np.uint16) / (1000.0 * 6.58)  # why this value?
-                # depth_gt = cv2.imread(depth_gt_path, cv2.IMREAD_UNCHANGED) / 1000.0
+                depth_gt = media.read_image(depth_gt_path, dtype=np.uint16) / 1000.0  # convert from mm to m
+                if dataset == 'replica':
+                    depth_gt /= 6.58  # why this value?
+        
                 if rendered_resolution_scaling_factor != 1:
                     new_height = int(image_gt.shape[0] * rendered_resolution_scaling_factor)
                     new_width = int(image_gt.shape[1] * rendered_resolution_scaling_factor)
@@ -328,7 +332,7 @@ def _render_trajectory_video(
         openseg_colors /= np.max(openseg_colors, axis=0, keepdims=True)
 
         with open(output_image_dir / 'openseg.npy', 'wb') as f:
-            np.save(f, openseg_aggregate)
+            np.save(f, openseg_aggregate.astype(np.float16))
 
         v = viz.Visualizer()
         v.add_points(f'colors', points, colors_aggregate * 255, normals, resolution=4)
@@ -349,14 +353,16 @@ def _render_trajectory_video(
         with open(output_image_dir / f'semantics_{scene}.txt', 'w') as f:
             np.savetxt(f, semantic_classes_pr.astype(int), fmt='%d', delimiter='\n')
 
-        semantic_classes_gt_path = f'datasets/replica_gt_semantics/semantic_labels_{scene}.txt'
-        with open(semantic_classes_gt_path) as f:
-            semantic_classes_gt = [int(l.rstrip()) for l in f.readlines()]
-            semantic_classes_gt_colors = np.array([list(replica.SCANNET_COLOR_MAP_200.values())[replica.map_to_reduced[i]] for i in semantic_classes_gt])
+        semantic_classes_gt_path = Path(f'datasets/replica_gt_semantics/semantic_labels_{scene}.txt')
+        if semantic_classes_gt_path.exists():
+            with open(semantic_classes_gt_path) as f:
+                semantic_classes_gt = [int(l.rstrip()) for l in f.readlines()]
+                semantic_classes_gt_colors = np.array([list(replica.SCANNET_COLOR_MAP_200.values())[replica.map_to_reduced[i]] for i in semantic_classes_gt])
 
         mask = points[:, 2] < np.max(points[:, 2]) * 0.9  # cut off the ceiling so we can easy see inside the scene
         v.add_points(f'semantics_pr', points[mask], semantic_classes_pr_colors[mask], normals[mask], resolution=4)
-        v.add_points(f'semantics_gt', points[mask], semantic_classes_gt_colors[mask], normals[mask], resolution=4)
+        if semantic_classes_gt_path.exists():
+            v.add_points(f'semantics_gt', points[mask], semantic_classes_gt_colors[mask], normals[mask], resolution=4)
         v.save(output_image_dir / 'vis')
 
     table = Table(
@@ -605,12 +611,13 @@ class RenderInterpolated(BaseRender):
             assert pipeline.datamanager.train_dataset is not None
             cameras = pipeline.datamanager.train_dataset.cameras
 
-        seconds = self.interpolation_steps * len(cameras) / self.frame_rate
         camera_path = get_interpolated_camera_path(
             cameras=cameras,
             steps=self.interpolation_steps,
             order_poses=self.order_poses,
         )
+
+        # camera_path = pipeline.datamanager.train_dataset.cameras
 
         _render_trajectory_video(
             pipeline,
@@ -618,14 +625,13 @@ class RenderInterpolated(BaseRender):
             output_filename=self.output_path,
             rendered_output_names=self.rendered_output_names[0].split(','),
             rendered_resolution_scaling_factor=1.0 / self.downscale_factor,
-            seconds=seconds,
+            seconds=self.interpolation_steps * len(cameras) / self.frame_rate,
             output_format=self.output_format,
             image_format=self.image_format,
             depth_near_plane=self.depth_near_plane,
             depth_far_plane=self.depth_far_plane,
             colormap_options=self.colormap_options,
         )
-
 
 Commands = tyro.conf.FlagConversionOff[
     Union[

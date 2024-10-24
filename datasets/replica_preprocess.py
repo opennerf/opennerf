@@ -175,7 +175,9 @@ def replica_to_json(images_paths: List[Path], trajectory_txt: Path, output_dir: 
 
 
 if __name__ == "__main__":
-    for scene in replica.scenes:
+    scenes = replica.scenes
+    dataset_name = 'replica'
+    for scene in scenes:
       data = f'data/Replica/{scene}'
       output_dir = f'data/nerfstudio/replica_{scene}'
       process_replica(Path(data), Path(output_dir))

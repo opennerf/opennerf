@@ -137,7 +137,6 @@ This version of the code corresponds to entry (2) "Render & Project" in Table 2 
 
 ![Coordindate_systems](https://opennerf.github.io/static/images/coordinate_systems.jpg)
 
-
 ## BibTeX
 If you find our code or paper useful, please cite:
 ```bibtex
