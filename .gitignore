@@ -5,3 +5,4 @@ outputs
 data_local
 outputs_local/
 models
+datasets
