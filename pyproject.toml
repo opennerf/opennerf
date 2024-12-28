@@ -4,6 +4,8 @@ description = "OpenNeRF embedding OpenSeg features into NeRF."
 version = "0.1.0"
 
 dependencies = [
+    "tyro<0.8.15",
+    "numpy<2.0",
     "open_clip_torch",
     "clip @ git+https://github.com/openai/CLIP.git",
     "nerfstudio >= 0.3.1",
