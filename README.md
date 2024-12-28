@@ -44,6 +44,7 @@ python -m pip install ninja git+https://github.com/NVlabs/tiny-cuda-nn/#subdirec
 git clone https://github.com/opennerf/opennerf
 cd opennerf
 python -m pip install -e .
+pip install --upgrade --force-reinstall pillow
 ns-install-cli
 ```
 
