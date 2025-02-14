@@ -65,10 +65,27 @@ Download the Replica dataset pre-processed by [NICE-SLAM](https://pengsongyou.gi
 ```
 cd data
 wget https://cvg-data.inf.ethz.ch/nice-slam/data/Replica.zip
-unzip Replica.zip
+unzip Replica.zip && mv Replica replica
 cd ..
-python datasets/preprocess.py --dataset-name=Replica
+python datasets/preprocess.py --dataset-name=replica
 ```
+
+## SceneFun3D Dataset
+
+Set up the SceneFun3D repository to download the dataset:
+```
+git clone https://github.com/SceneFun3D/scenefun3d.git
+cd scenefun3d
+conda create --name scenefun3d python=3.8
+conda activate scenefun3d
+pip install -r requirements.txt
+```
+
+Download the dataset (make sure to put the correct download_dir):
+```
+python -m data_downloader.data_asset_download --split test_set --download_dir /path/to/large_disk/data --download_only_one_video_sequence --dataset_assets arkit_mesh lowres_wide	lowres_depth
+```
+
 
 ### LERF Dataset
 The preprocessed LERF dataset is available from the [official repository](https://drive.google.com/drive/folders/1vh0mSl7v29yaGsxleadcj-LCZOE_WEWB).
@@ -134,22 +151,6 @@ This version of the code corresponds to entry (2) "Render & Project" in Table 2 
   </tr>
 </table>
 
-
-## SceneFun3D
-
-Set up the SceneFun3D repository to download the dataset:
-```
-git clone https://github.com/SceneFun3D/scenefun3d.git
-cd scenefun3d
-conda create --name scenefun3d python=3.8
-conda activate scenefun3d
-pip install -r requirements.txt
-```
-
-Download the dataset:
-```
-python -m data_downloader.data_asset_download --split test_set --download_dir /media/fengelmann/T9/scenefun3d/ --download_only_one_video_sequence --dataset_assets arkit_mesh lowres_wide	lowres_depth
-```
 
 ## Coordinate Frames
 
