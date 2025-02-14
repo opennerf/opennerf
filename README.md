@@ -67,7 +67,7 @@ cd data
 wget https://cvg-data.inf.ethz.ch/nice-slam/data/Replica.zip
 unzip Replica.zip
 cd ..
-python datasets/replica_preprocess.py
+python datasets/preprocess.py --dataset-name=Replica
 ```
 
 ### LERF Dataset
@@ -133,6 +133,23 @@ This version of the code corresponds to entry (2) "Render & Project" in Table 2 
     <td align="center">6.41%</td><td align="center">18.43%</td>
   </tr>
 </table>
+
+
+## SceneFun3D
+
+Set up the SceneFun3D repository to download the dataset:
+```
+git clone https://github.com/SceneFun3D/scenefun3d.git
+cd scenefun3d
+conda create --name scenefun3d python=3.8
+conda activate scenefun3d
+pip install -r requirements.txt
+```
+
+Download the dataset:
+```
+python -m data_downloader.data_asset_download --split test_set --download_dir /media/fengelmann/T9/scenefun3d/ --download_only_one_video_sequence --dataset_assets arkit_mesh lowres_wide	lowres_depth
+```
 
 ## Coordinate Frames
 
