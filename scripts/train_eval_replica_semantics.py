@@ -26,7 +26,7 @@ def train_scene(scene, experiment_name):
            f"--steps-per-eval-batch=500000",
            f"--steps-per-eval-image=500000",
            f"--steps-per-eval-all-images=500000",
-           f"--max-num-iterations=30",  # 30000
+           f"--max-num-iterations=30000",  # 30000
            f"--pipeline.model.openseg-loss-weight=1.0",
            f"--pipeline.model.dino-loss-weight=0.0",
            f"--pipeline.datamanager.train-num-rays-per-batch=2048",
@@ -120,7 +120,7 @@ def get_iou(label_id, confusion):
 def main():
     experiment_name = 'test25'
     for scene in replica.scenes:
-        # train_scene(scene, experiment_name)
+        train_scene(scene, experiment_name)
         eval_scene(scene, experiment_name)
     eval_semantics(experiment_name)
 
