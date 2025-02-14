@@ -266,7 +266,7 @@ def _render_trajectory_video(
         writer = None
 
         dataset, scene = output_image_dir.parent.parent.name.split('_', 1)
-        mesh_path = glob.glob(str(Path('data/nerfstudio/') / f'{dataset}_{scene}' / f'{scene}*.ply'))[0]
+        mesh_path = glob.glob(str(Path('data/nerfstudio/') / dataset / scene / f'{scene}*.ply'))[0]
         scene_point_cloud = o3d.io.read_point_cloud(mesh_path)
         points = np.array(scene_point_cloud.points)
         colors = np.array(scene_point_cloud.colors)
@@ -301,8 +301,8 @@ def _render_trajectory_video(
                 intrinsics[2, 2] = 1.0
                 depth = outputs["depth"].cpu().numpy() / scale_factor
 
-                image_gt_path = f'data/nerfstudio/{dataset}_{scene}/images/frame_{str(camera_idx + 1).zfill(5)}.jpg'
-                depth_gt_path = f'data/nerfstudio/{dataset}_{scene}/depths/frame_{str(camera_idx + 1).zfill(5)}.png'
+                image_gt_path = f'data/nerfstudio/{dataset}/{scene}/images/frame_{str(camera_idx + 1).zfill(5)}.jpg'
+                depth_gt_path = f'data/nerfstudio/{dataset}/{scene}/depths/frame_{str(camera_idx + 1).zfill(5)}.png'
 
                 image_gt = media.read_image(image_gt_path)
                 depth_gt = media.read_image(depth_gt_path, dtype=np.uint16) / 1000.0  # convert from mm to m
