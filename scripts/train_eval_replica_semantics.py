@@ -21,12 +21,12 @@ def train_scene(scene, experiment_name):
            os.path.join(CONDA_DIR, "lib/python3.10/site-packages/nerfstudio/scripts/train.py"),
            f"opennerf",
            f"--vis=wandb",  # viewer+wandb
-           f"--experiment-name=replica_{scene}",
+           f"--experiment-name=replica/{scene}",
            f"--viewer.num-rays-per-chunk=2048",
            f"--steps-per-eval-batch=500000",
            f"--steps-per-eval-image=500000",
            f"--steps-per-eval-all-images=500000",
-           f"--max-num-iterations=30000",  # 30000
+           f"--max-num-iterations=30",  # 30000
            f"--pipeline.model.openseg-loss-weight=1.0",
            f"--pipeline.model.dino-loss-weight=0.0",
            f"--pipeline.datamanager.train-num-rays-per-batch=2048",
@@ -41,13 +41,13 @@ def eval_scene(scene, experiment_name):
         f"{PREFIX}/datasets/replica_semantics.py",
         f"interpolate",
         f"--interpolation-steps=1",
-        f"--pose_source=train",
-        f"--load-config={PREFIX}/outputs/replica_{scene}/opennerf/{experiment_name}/config.yml",
+        f"--pose_source=eval",
+        f"--load-config={PREFIX}/outputs/replica/{scene}/opennerf/{experiment_name}/config.yml",
         f"--colormap-options.colormap=pca",
-        f"--output_path={PREFIX}/outputs/replica_{scene}/opennerf/{experiment_name}/",
+        f"--output_path={PREFIX}/outputs/replica/{scene}/opennerf/{experiment_name}/",
         f"--rendered-output-names=rgb",
         f"--eval-num-rays-per-chunk=500",
-        f"--downscale-factor=2",]
+        f"--downscale-factor=4",]
     subprocess.run(cmd)
 
 
@@ -55,7 +55,7 @@ def eval_semantics(experiment_name):
     pr_files = []  # predicted files
     gt_files = []  # ground truth files
     for scene in replica.scenes:
-        pr_files.append(f'{PREFIX}/outputs/replica_{scene}/opennerf/{experiment_name}/semantics_{scene}.txt')
+        pr_files.append(f'{PREFIX}/outputs/replica/{scene}/opennerf/{experiment_name}/semantics_{scene}.txt')
         gt_files.append(f'{PREFIX}/datasets/replica_gt_semantics/semantic_labels_{scene}.txt')
     
     confusion = np.zeros([replica.num_classes, replica.num_classes], dtype=np.ulonglong)
@@ -120,7 +120,7 @@ def get_iou(label_id, confusion):
 def main():
     experiment_name = 'test25'
     for scene in replica.scenes:
-        train_scene(scene, experiment_name)
+        # train_scene(scene, experiment_name)
         eval_scene(scene, experiment_name)
     eval_semantics(experiment_name)
 

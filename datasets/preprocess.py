@@ -10,6 +10,7 @@ import os
 import pymeshlab
 import shutil
 import replica
+# import scenefun3d
 import open3d as o3d
 
 from nerfstudio.process_data import process_data_utils
@@ -425,22 +426,28 @@ def process_iphone_scene(data: Path, output_dir: Path, num_frames: int):
 
 
 def process_scenefun3d_scene(data: Path, output_dir: Path, num_frames: int):
-  pass
+    """Process SceneFun3D data into a nerfstudio dataset.
+
+    This script does the following:
+
+    1. Scales images to a specified size.
+    2. Converts SceneFun3D poses into the nerfstudio format.
+    """
 
 
 def main(dataset_name: str, num_frames: int = 200) -> None:
 
     scene_names = []
-    if dataset_name == 'iphone':
-        scene_names = ['desk', 'people', 'spot']
-        process_scene = process_iphone_scene
-    elif dataset_name == 'replica':
+    if dataset_name == 'replica':
         scene_names = replica.scenes
         process_scene = process_replica_scene
     elif dataset_name == 'scenefun3d':
         # scene_names = scenefun3d.scenes
         process_scene = process_scenefun3d_scene
-
+    elif dataset_name == 'iphone':
+        scene_names = ['desk', 'people', 'spot']  # example scenes
+        process_scene = process_iphone_scene
+    
     for scene_name in scene_names:
       data = f'data/{dataset_name}/{scene_name}'
       output_dir = f'data/nerfstudio/{dataset_name}/{scene_name}'

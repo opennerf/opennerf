@@ -264,8 +264,8 @@ def _render_trajectory_video(
 
     with ExitStack() as stack:
         writer = None
-
-        dataset, scene = output_image_dir.parent.parent.name.split('_', 1)
+        dataset = output_image_dir.parent.parent.parent.name
+        scene = output_image_dir.parent.parent.name
         mesh_path = glob.glob(str(Path('data/nerfstudio/') / dataset / scene / f'{scene}*.ply'))[0]
         scene_point_cloud = o3d.io.read_point_cloud(mesh_path)
         points = np.array(scene_point_cloud.points)

@@ -76,7 +76,7 @@ class OpenNerfDataManager(VanillaDataManager):  # pylint: disable=abstract-metho
         images = [self.train_dataset[i]["image"].permute(2, 0, 1)[None, ...] for i in range(len(self.train_dataset))]
         images = torch.cat(images)
 
-        cache_dir = f"outputs/{self.config.dataparser.data.name}"
+        cache_dir = f"outputs/{self.config.dataparser.data.parent.name}/{self.config.dataparser.data.name}"
         dino_cache_path = Path(osp.join(cache_dir, "dino.npy"))
         openseg_cache_path = Path(osp.join(cache_dir, "openseg.npy"))
         # NOTE: cache config is sensitive to list vs. tuple, because it checks for dict equality
