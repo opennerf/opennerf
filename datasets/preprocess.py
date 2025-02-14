@@ -9,6 +9,7 @@ import json
 import os
 import pymeshlab
 import shutil
+import replica
 import open3d as o3d
 
 from nerfstudio.process_data import process_data_utils
@@ -27,7 +28,7 @@ def process_txt(filename):
     return lines
 
 
-def process_replica_scene(data: Path, output_dir: Path):
+def process_replica_scene(data: Path, output_dir: Path, num_frames: int):
     """Process Replica data into a nerfstudio dataset.
 
     This script does the following:
@@ -423,14 +424,27 @@ def process_iphone_scene(data: Path, output_dir: Path, num_frames: int):
         json.dump(out, f, indent=4)
 
 
-def main(dataset_name: str, scene_name: str, num_frames: int) -> None:
-    data = f'data/{dataset_name}/{scene_name}'
-    output_dir = f'data/nerfstudio/{dataset_name}_{scene_name}'
+def process_scenefun3d_scene(data: Path, output_dir: Path, num_frames: int):
+  pass
+
+
+def main(dataset_name: str, num_frames: int = 200) -> None:
+
+    scene_names = []
     if dataset_name == 'iphone':
+        scene_names = ['desk', 'people', 'spot']
         process_scene = process_iphone_scene
     elif dataset_name == 'replica':
+        scene_names = replica.scenes
         process_scene = process_replica_scene
-    process_scene(Path(data), Path(output_dir), num_frames)
+    elif dataset_name == 'scenefun3d':
+        # scene_names = scenefun3d.scenes
+        process_scene = process_scenefun3d_scene
+
+    for scene_name in scene_names:
+      data = f'data/{dataset_name}/{scene_name}'
+      output_dir = f'data/nerfstudio/{dataset_name}/{scene_name}'
+      process_scene(Path(data), Path(output_dir), num_frames)
 
 if __name__ == "__main__":
     tyro.cli(main)

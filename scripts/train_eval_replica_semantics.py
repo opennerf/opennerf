@@ -16,6 +16,7 @@ def process_txt(filename):
 
 
 def train_scene(scene, experiment_name):
+
     cmd = [os.path.join(CONDA_DIR, "bin/python"),
            os.path.join(CONDA_DIR, "lib/python3.10/site-packages/nerfstudio/scripts/train.py"),
            f"opennerf",
@@ -29,7 +30,7 @@ def train_scene(scene, experiment_name):
            f"--pipeline.model.openseg-loss-weight=1.0",
            f"--pipeline.model.dino-loss-weight=0.0",
            f"--pipeline.datamanager.train-num-rays-per-batch=2048",
-           f"--data={PREFIX}/data/nerfstudio/replica_{scene}",
+           f"--data={PREFIX}/data/nerfstudio/replica/{scene}",
            f"--output-dir={PREFIX}/outputs",
            f"--timestamp={experiment_name}"]
     subprocess.run(cmd)
@@ -51,7 +52,6 @@ def eval_scene(scene, experiment_name):
 
 
 def eval_semantics(experiment_name):
-
     pr_files = []  # predicted files
     gt_files = []  # ground truth files
     for scene in replica.scenes:
@@ -118,7 +118,7 @@ def get_iou(label_id, confusion):
 
 
 def main():
-    experiment_name = 'w_dino_0'
+    experiment_name = 'test25'
     for scene in replica.scenes:
         train_scene(scene, experiment_name)
         eval_scene(scene, experiment_name)
