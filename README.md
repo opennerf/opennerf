@@ -59,6 +59,12 @@ ln -s path/to/large_disk/outputs outputs
 ```
 
 Download the OpenSeg feature extractor model from [here](https://drive.google.com/file/d/1DgyH-1124Mo8p6IUJ-ikAiwVZDDfteak/view?usp=sharing) and unzip it into `./models`.
+```
+cd models
+wget https://geometry.stanford.edu/projects/openseg/openseg_exported_clip.zip
+unzip openseg_exported_clip.zip
+```
+
 
 ### Replica Dataset
 Download the Replica dataset pre-processed by [NICE-SLAM](https://pengsongyou.github.io/nice-slam) and transform it into [nerfstudio](https://docs.nerf.studio) format using these steps:
