@@ -36,6 +36,7 @@ python -m pip install --upgrade pip
 conda install nvidia/label/cuda-12.1.1::cuda
 conda install pytorch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 pytorch-cuda=12.1 -c pytorch -c nvidia
 python -m pip install ninja git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/torch
+python3 -m pip install 'tensorflow[and-cuda]'
 ```
 
 ### Install OpenNeRF
@@ -58,7 +59,13 @@ ln -s path/to/large_disk/models models
 ln -s path/to/large_disk/outputs outputs
 ```
 
-Download the OpenSeg feature extractor model from [here](https://drive.google.com/file/d/1DgyH-1124Mo8p6IUJ-ikAiwVZDDfteak/view?usp=sharing) and unzip it into `./models`.
+Download the OpenSeg feature extractor model and unzip it into `./models`.
+```
+cd models
+wget https://geometry.stanford.edu/projects/openseg/openseg_exported_clip.zip
+unzip openseg_exported_clip.zip
+```
+
 
 ### Replica Dataset
 Download the Replica dataset pre-processed by [NICE-SLAM](https://pengsongyou.github.io/nice-slam) and transform it into [nerfstudio](https://docs.nerf.studio) format using these steps:
