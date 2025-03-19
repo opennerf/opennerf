@@ -16,7 +16,6 @@ def process_txt(filename):
 
 
 def train_scene(scene, experiment_name):
-
     cmd = [os.path.join(CONDA_DIR, "bin/python"),
            os.path.join(CONDA_DIR, "lib/python3.10/site-packages/nerfstudio/scripts/train.py"),
            f"opennerf",

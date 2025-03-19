@@ -10,7 +10,8 @@ import os
 import pymeshlab
 import shutil
 import replica
-# import scenefun3d
+import scenefun3d
+import tqdm
 import open3d as o3d
 
 from nerfstudio.process_data import process_data_utils
@@ -181,7 +182,7 @@ def replica_to_json(images_paths: List[Path], trajectory_txt: Path, output_dir: 
     return len(frames)
 
 
-def process_iphone_scene(data: Path, output_dir: Path, num_frames: int):
+def process_iphone_scene(data: Path, output_dir: Path, num_frames: int = 200):
     """Process iPhone data into a nerfstudio dataset.
 
     This script does the following:
@@ -433,6 +434,133 @@ def process_scenefun3d_scene(data: Path, output_dir: Path, num_frames: int):
     1. Scales images to a specified size.
     2. Converts SceneFun3D poses into the nerfstudio format.
     """
+    
+    mesh_path = data / f'{data.name}_arkit_mesh.ply'
+    os.makedirs(output_dir, exist_ok=True)
+    shutil.copy(mesh_path, output_dir)
+
+    verbose = True
+    num_downscales = 2
+    """Number of times to downscale the images. Downscales by 2 each time. For example a value of 3
+        will downscale the images by 2x, 4x, and 8x."""
+    max_dataset_size = num_frames
+    """Max number of images to train on. If the dataset has more, images will be sampled approximately evenly. If -1,
+    use all images."""
+
+    image_dir = output_dir / "images"
+    image_dir.mkdir(parents=True, exist_ok=True)
+    depth_dir = output_dir / "depths"
+    depth_dir.mkdir(parents=True, exist_ok=True)
+
+    summary_log = []
+
+    scenefun3d_image_dir = data / "hires_wide"
+    scenefun3d_depth_dir = data / "hires_depth"
+    
+    if not scenefun3d_image_dir.exists():
+        raise ValueError(f"Image directory {scenefun3d_image_dir} doesn't exist")
+    if not scenefun3d_depth_dir.exists():
+        raise ValueError(f"Depth directory {scenefun3d_depth_dir} doesn't exist")
+      
+    scenefun3d_image_filenames = []
+    scenefun3d_depth_filenames = []
+    
+    depth_timesteps = [float(f.name[:-4].split('_')[1]) for f in sorted(scenefun3d_depth_dir.iterdir())]
+    depth_filenames = list(sorted(scenefun3d_depth_dir.iterdir()))
+    
+    for f in tqdm.tqdm(sorted(scenefun3d_image_dir.iterdir())):
+      query_timestep = float(f.name[:-4].split('_')[1])
+      closest_timestep = min(depth_timesteps, key=lambda x: abs(x - query_timestep))
+      if abs(query_timestep - closest_timestep) < 0.1:
+        scenefun3d_image_filenames.append(f)
+        closest_timestep_idx = depth_timesteps.index(closest_timestep)
+        depth_filename = depth_filenames[closest_timestep_idx]
+        scenefun3d_depth_filenames.append(depth_filename)
+      else:
+        print(f'NO {f.name}')
+
+    assert(len(scenefun3d_image_filenames) == len(scenefun3d_depth_filenames))
+    num_images = len(scenefun3d_image_filenames)
+    print(num_images)
+
+    idx = np.arange(num_images)
+    if max_dataset_size != -1 and num_images > max_dataset_size:
+        idx = np.round(np.linspace(0, num_images - 1, max_dataset_size)).astype(int)
+
+    scenefun3d_image_filenames = list(np.array(scenefun3d_image_filenames)[idx])
+    scenefun3d_depth_filenames = list(np.array(scenefun3d_depth_filenames)[idx])
+
+    # Copy images to output directory
+    copied_image_paths = process_data_utils.copy_images_list(
+        scenefun3d_image_filenames,
+        image_dir=image_dir,
+        verbose=verbose,
+        num_downscales=num_downscales,
+    )
+    copied_depth_paths = process_data_utils.copy_images_list(
+        scenefun3d_depth_filenames,
+        image_dir=depth_dir,
+        verbose=verbose,
+        num_downscales=num_downscales,
+    )
+    assert(len(copied_image_paths) == len(copied_depth_paths))
+    num_frames = len(copied_image_paths)
+
+    copied_image_paths = [Path("images/" + copied_image_path.name) for copied_image_path in copied_image_paths]
+    summary_log.append(f"Used {num_frames} images out of {num_images} total")
+    if max_dataset_size > 0:
+        summary_log.append(
+            "To change the size of the dataset add the argument [yellow]--max_dataset_size[/yellow] to "
+            f"larger than the current value ({max_dataset_size}), or -1 to use all images."
+        )
+
+    traj_file_path = data / "hires_poses.traj"
+    with open(traj_file_path) as f:
+      traj = f.readlines()
+
+    poses_from_traj = {}
+    for line in traj:
+      traj_timestamp = line.split(" ")[0]
+      poses_from_traj[f"{float(traj_timestamp)}"] = np.array(self.TrajStringToMatrix(line)[1].tolist())
+
+    scenefun3d_to_json(copied_image_paths, traj_path, output_dir, indices=idx)
+
+
+  def TrajStringToMatrix(self, traj_str):
+      """ 
+      Converts a line from the camera trajectory file into translation and rotation matrices.
+
+      Args:
+          traj_str (str): A space-delimited string where each line represents a camera pose at a particular timestamp. 
+                          The line consists of seven columns:
+              - Column 1: timestamp
+              - Columns 2-4: rotation (axis-angle representation in radians)
+              - Columns 5-7: translation (in meters)
+
+      Returns:
+          (tuple): A tuple containing:
+              - ts (str): Timestamp.
+              - Rt (numpy.ndarray): 4x4 transformation matrix representing rotation and translation.
+
+      Raises:
+          AssertionError: If the input string does not have exactly seven columns.
+      """
+      tokens = traj_str.split()
+      assert len(tokens) == 7
+      ts = tokens[0]
+
+      # Rotation in angle axis
+      angle_axis = [float(tokens[1]), float(tokens[2]), float(tokens[3])]
+      r_w_to_p = convert_angle_axis_to_matrix3(np.asarray(angle_axis))
+
+      # Translation
+      t_w_to_p = np.asarray([float(tokens[4]), float(tokens[5]), float(tokens[6])])
+      extrinsics = np.eye(4, 4)
+      extrinsics[:3, :3] = r_w_to_p
+      extrinsics[:3, -1] = t_w_to_p
+      Rt = np.linalg.inv(extrinsics)
+
+      return (ts, Rt)
 
 
 def main(dataset_name: str, num_frames: int = 200) -> None:
@@ -442,7 +570,7 @@ def main(dataset_name: str, num_frames: int = 200) -> None:
         scene_names = replica.scenes
         process_scene = process_replica_scene
     elif dataset_name == 'scenefun3d':
-        # scene_names = scenefun3d.scenes
+        scene_names = scenefun3d.test_scenes
         process_scene = process_scenefun3d_scene
     elif dataset_name == 'iphone':
         scene_names = ['desk', 'people', 'spot']  # example scenes

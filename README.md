@@ -83,8 +83,10 @@ pip install -r requirements.txt
 
 Download the dataset (make sure to put the correct download_dir):
 ```
-python -m data_downloader.data_asset_download --split test_set --download_dir /path/to/large_disk/data --download_only_one_video_sequence --dataset_assets arkit_mesh lowres_wide	lowres_depth
+python -m data_downloader.data_asset_download --split test_set --download_dir /path/to/large_disk/data --visit_id 421372 --download_only_one_video_sequence --dataset_assets arkit_mesh	hires_poses	transform laser_scan_5mm
 ```
+
+<!-- python -m data_downloader.data_asset_download --download_dir /media/fengelmann/T9/opennerf/data/scenefun3d/ --visit_id 421372 --download_only_one_video_sequence --dataset_assets laser_scan_5mm -->
 
 
 ### LERF Dataset
